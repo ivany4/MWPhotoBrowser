@@ -381,7 +381,7 @@
     [self setNavBarAppearance:animated];
     
     // Update UI
-	[self hideControlsAfterDelay];
+//	[self hideControlsAfterDelay];
     
     // Initial appearance
     if (!_viewHasAppearedInitially) {
@@ -587,7 +587,7 @@
 	_currentPageIndex = _pageIndexBeforeRotation;
 	
 	// Delay control holding
-	[self hideControlsAfterDelay];
+//	[self hideControlsAfterDelay];
     
     // Layout
     [self layoutVisiblePages];
@@ -1046,7 +1046,7 @@
 
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
 	// Hide controls when dragging begins
-	[self setControlsHidden:YES animated:YES permanent:NO];
+//	[self setControlsHidden:YES animated:YES permanent:NO];
 }
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
@@ -1099,7 +1099,7 @@
 	}
 	
 	// Update timer to give more time
-	[self hideControlsAfterDelay];
+//	[self hideControlsAfterDelay];
 	
 }
 
@@ -1362,7 +1362,7 @@
 	// Control hiding timer
 	// Will cancel existing timer but only begin hiding if
 	// they are visible
-	if (!permanent) [self hideControlsAfterDelay];
+//	if (!permanent) [self hideControlsAfterDelay];
 	
 }
 
