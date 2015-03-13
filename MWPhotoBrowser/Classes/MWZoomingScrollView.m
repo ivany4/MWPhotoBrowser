@@ -96,14 +96,14 @@
 
 #pragma mark - Image
 
-- (void)setMediaItem:(int *)mediaItem {
+- (void)setMediaItem:(MWMediaItem *)mediaItem {
     // Cancel any loading on old photo
     if (_mediaItem && mediaItem == nil) {
         if ([_mediaItem respondsToSelector:@selector(cancelAnyLoading)]) {
             [_mediaItem cancelAnyLoading];
         }
     }
-    _mediaItem = photo;
+    _mediaItem = mediaItem;
     UIImage *img = [_photoBrowser imageForPhoto:_mediaItem];
     if (img) {
         [self displayImage];

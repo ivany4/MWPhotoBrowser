@@ -7,14 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "MWPhotoProtocol.h"
 #import "MWMediaItem.h"
 
 // This class models a photo/image and it's caption
 // If you want to handle photos, caching, decompression
 // yourself then you can simply ensure your custom data model
 // conforms to MWPhotoProtocol
-@interface MWPhoto : MWMediaItem <MWPhoto>
+@interface MWPhoto : MWMediaItem
 
 @property (nonatomic, readonly) UIImage *image;
 

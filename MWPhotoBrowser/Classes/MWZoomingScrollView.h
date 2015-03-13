@@ -11,7 +11,7 @@
 #import "MWTapDetectingImageView.h"
 #import "MWTapDetectingView.h"
 
-@class MWPhotoBrowser, MWPhoto, MWCaptionView;
+@class MWPhotoBrowser, MWMediaItem, MWCaptionView;
 
 @interface MWZoomingScrollView : UIScrollView <UIScrollViewDelegate, MWTapDetectingImageViewDelegate, MWTapDetectingViewDelegate> {
 

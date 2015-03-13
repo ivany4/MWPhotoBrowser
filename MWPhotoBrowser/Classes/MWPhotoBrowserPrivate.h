@@ -8,7 +8,6 @@
 
 #import <UIKit/UIKit.h>
 #import "MBProgressHUD.h"
-#import "MWGridViewController.h"
 #import "MWZoomingScrollView.h"
 
 // Declare private methods of browser
@@ -17,7 +16,6 @@
 	// Data
     NSUInteger _mediaItemCount;
     NSMutableArray *_mediaItems;
-    NSMutableArray *_thumbnails;
 	
 	// Views
 	UIScrollView *_pagingScrollView;
@@ -35,12 +33,7 @@
 	UIBarButtonItem *_previousButton, *_nextButton, *_actionButton, *_doneButton;
     MBProgressHUD *_progressHUD;
     UIActionSheet *_actionsSheet;
-    
-    // Grid
-    MWGridViewController *_gridController;
-    UIBarButtonItem *_gridPreviousLeftNavItem;
-    UIBarButtonItem *_gridPreviousRightNavItem;
-    
+        
     // Appearance
     BOOL _previousNavBarHidden;
     BOOL _previousNavBarTranslucent;
@@ -64,7 +57,6 @@
     BOOL _didSavePreviousStateOfNavBar;
     BOOL _skipNextPagingScrollViewPositioning;
     BOOL _viewHasAppearedInitially;
-    CGPoint _currentGridContentOffset;
     
 }
 
@@ -105,10 +97,6 @@
 - (void)gotoPreviousPage;
 - (void)gotoNextPage;
 
-// Grid
-- (void)showGrid:(BOOL)animated;
-- (void)hideGrid;
-
 // Controls
 - (void)cancelControlHiding;
 - (void)hideControlsAfterDelay;
@@ -119,7 +107,6 @@
 // Data
 - (NSUInteger)numberOfPhotos;
 - (MWMediaItem *)mediaItemAtIndex:(NSUInteger)index;
-- (MWMediaItem *)thumbnailAtIndex:(NSUInteger)index;
 - (UIImage *)imageForPhoto:(id<MWPhoto>)photo;
 - (BOOL)mediaItemIsSelectedAtIndex:(NSUInteger)index;
 - (void)setMediaItemSelected:(BOOL)selected atIndex:(NSUInteger)index;

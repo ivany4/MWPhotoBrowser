@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "MWPhotoProtocol.h"
+#import "MWMediaItem.h"
 
 @interface MWCaptionView : UIToolbar
 

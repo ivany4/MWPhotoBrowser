@@ -7,8 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "MWPhotoProtocol.h"
 
-@interface MWMediaItem : NSObject
+@interface MWMediaItem : NSObject <MWPhoto>
 @property (nonatomic, strong) NSString *caption;
 @property (nonatomic, readonly) NSURL *URL;
 @property (nonatomic, assign) BOOL isVideo;

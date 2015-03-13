@@ -27,7 +27,6 @@
 
 @optional
 
-- (id <MWPhoto>)browser:(MWPhotoBrowser *)browser thumbnailAtIndex:(NSUInteger)index;
 - (MWCaptionView *)browser:(MWPhotoBrowser *)browser captionViewForMediaItemAtIndex:(NSUInteger)index;
 - (NSString *)browser:(MWPhotoBrowser *)browser titleForMediaItemAtIndex:(NSUInteger)index;
 - (void)browser:(MWPhotoBrowser *)browser didDisplayMediaItemAtIndex:(NSUInteger)index;
@@ -46,9 +45,7 @@
 @property (nonatomic) BOOL displayActionButton;
 @property (nonatomic) BOOL displaySelectionButtons;
 @property (nonatomic) BOOL alwaysShowControls;
-@property (nonatomic) BOOL enableGrid;
 @property (nonatomic) BOOL enableSwipeToDismiss;
-@property (nonatomic) BOOL startOnGrid;
 @property (nonatomic) NSUInteger delayToHideElements;
 @property (nonatomic, readonly) NSUInteger currentIndex;
 
