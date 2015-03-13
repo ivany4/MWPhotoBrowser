@@ -182,7 +182,7 @@
     
     // Setup
     _performingLayout = YES;
-    NSUInteger numberOfPhotos = [self numberOfPhotos];
+    NSUInteger numberOfMediaItems = [self numberOfPhotos];
     
 	// Setup pages
     [_visiblePages removeAllObjects];
@@ -230,7 +230,7 @@
     [items addObject:fixedSpace];
 
     // Middle - Nav
-    if (_previousButton && _nextButton && numberOfPhotos > 1) {
+    if (_previousButton && _nextButton && numberOfMediaItems > 1) {
         hasItems = YES;
         [items addObject:flexSpace];
         [items addObject:_previousButton];
@@ -551,16 +551,16 @@
     _mediaItemCount = NSNotFound;
     
     // Get data
-    NSUInteger numberOfPhotos = [self numberOfPhotos];
+    NSUInteger numberOfMediaItems = [self numberOfPhotos];
     [self releaseAllUnderlyingPhotos:YES];
     [_mediaItems removeAllObjects];
-    for (int i = 0; i < numberOfPhotos; i++) {
+    for (int i = 0; i < numberOfMediaItems; i++) {
         [_mediaItems addObject:[NSNull null]];
     }
 
     // Update current page index
-    if (numberOfPhotos > 0) {
-        _currentPageIndex = MAX(0, MIN(_currentPageIndex, numberOfPhotos - 1));
+    if (numberOfMediaItems > 0) {
+        _currentPageIndex = MAX(0, MIN(_currentPageIndex, numberOfMediaItems - 1));
     } else {
         _currentPageIndex = 0;
     }
@@ -633,13 +633,13 @@
     }
 }
 
-- (UIImage *)imageForPhoto:(id<MWPhoto>)photo {
-	if (photo) {
+- (UIImage *)imageForMediaItem:(MWMediaItem *)mediaItem {
+	if (mediaItem) {
 		// Get image or obtain in background
-		if ([photo underlyingImage]) {
-			return [photo underlyingImage];
+		if ([mediaItem underlyingImage]) {
+			return [mediaItem underlyingImage];
 		} else {
-            [photo loadUnderlyingImageAndNotify];
+            [mediaItem loadUnderlyingImageAndNotify];
 		}
 	}
 	return nil;
@@ -674,13 +674,13 @@
 #pragma mark - MWPhoto Loading Notification
 
 - (void)handleMWPhotoLoadingDidEndNotification:(NSNotification *)notification {
-    id <MWPhoto> photo = [notification object];
-    MWZoomingScrollView *page = [self pageDisplayingMediaItem:photo];
+    MWMediaItem *mediaItem = [notification object];
+    MWZoomingScrollView *page = [self pageDisplayingMediaItem:mediaItem];
     if (page) {
-        if ([photo underlyingImage]) {
+        if ([mediaItem underlyingImage]) {
             // Successful load
             [page displayImage];
-            [self loadAdjacentMediaItemsIfNecessary:photo];
+            [self loadAdjacentMediaItemsIfNecessary:mediaItem];
         } else {
             // Failed to load
             [page displayImageFailure];
@@ -851,10 +851,10 @@
     
     // Load adjacent images if needed and the photo is already
     // loaded. Also called after photo has been loaded in background
-    id <MWPhoto> currentPhoto = [self mediaItemAtIndex:index];
-    if ([currentPhoto underlyingImage]) {
+    MWMediaItem *currentMediaItem = [self mediaItemAtIndex:index];
+    if ([currentMediaItem underlyingImage]) {
         // photo loaded so load ajacent now
-        [self loadAdjacentMediaItemsIfNecessary:currentPhoto];
+        [self loadAdjacentMediaItemsIfNecessary:currentMediaItem];
     }
     
     // Notify delegate
@@ -1252,8 +1252,8 @@
     } else {
         
         // Only react when image has loaded
-        id <MWPhoto> photo = [self mediaItemAtIndex:_currentPageIndex];
-        if ([self numberOfPhotos] > 0 && [photo underlyingImage]) {
+        MWMediaItem *mediaItem = [self mediaItemAtIndex:_currentPageIndex];
+        if ([self numberOfPhotos] > 0 && [mediaItem underlyingImage]) {
             
             // If they have defined a delegate method then just message them
             if ([self.delegate respondsToSelector:@selector(browser:actionButtonPressedForMediaItemAtIndex:)]) {
@@ -1287,9 +1287,9 @@
                 } else {
                     
                     // Show activity view controller
-                    NSMutableArray *items = [NSMutableArray arrayWithObject:[photo underlyingImage]];
-                    if (photo.caption) {
-                        [items addObject:photo.caption];
+                    NSMutableArray *items = [NSMutableArray arrayWithObject:[mediaItem underlyingImage]];
+                    if (mediaItem.caption) {
+                        [items addObject:mediaItem.caption];
                     }
                     self.activityViewController = [[UIActivityViewController alloc] initWithActivityItems:items applicationActivities:nil];
                     
@@ -1388,16 +1388,16 @@
 #pragma mark - Actions
 
 - (void)saveMediaItem {
-    MWMediaItem *photo = [self mediaItemAtIndex:_currentPageIndex];
-    if ([photo underlyingImage]) {
+    MWMediaItem *mediaItem = [self mediaItemAtIndex:_currentPageIndex];
+    if ([mediaItem underlyingImage]) {
         [self showProgressHUDWithMessage:[NSString stringWithFormat:@"%@\u2026" , NSLocalizedString(@"Saving", @"Displayed with ellipsis as 'Saving...' when an item is in the process of being saved")]];
-        [self performSelector:@selector(actuallySavePhoto:) withObject:photo afterDelay:0];
+        [self performSelector:@selector(actuallySaveMediaItem:) withObject:mediaItem afterDelay:0];
     }
 }
 
-- (void)actuallySavePhoto:(id<MWPhoto>)photo {
-    if ([photo underlyingImage]) {
-        UIImageWriteToSavedPhotosAlbum([photo underlyingImage], self, 
+- (void)actuallySaveMediaItem:(MWMediaItem *)mediaItem {
+    if ([mediaItem underlyingImage]) {
+        UIImageWriteToSavedPhotosAlbum([mediaItem underlyingImage], self, 
                                        @selector(image:didFinishSavingWithError:contextInfo:), nil);
     }
 }
@@ -1408,16 +1408,16 @@
 }
 
 - (void)copyMediaItem {
-    id <MWPhoto> photo = [self mediaItemAtIndex:_currentPageIndex];
-    if ([photo underlyingImage]) {
+    MWMediaItem *mediaItem = [self mediaItemAtIndex:_currentPageIndex];
+    if ([mediaItem underlyingImage]) {
         [self showProgressHUDWithMessage:[NSString stringWithFormat:@"%@\u2026" , NSLocalizedString(@"Copying", @"Displayed with ellipsis as 'Copying...' when an item is in the process of being copied")]];
-        [self performSelector:@selector(actuallyCopyPhoto:) withObject:photo afterDelay:0];
+        [self performSelector:@selector(actuallyCopyMediaItem:) withObject:mediaItem afterDelay:0];
     }
 }
 
-- (void)actuallyCopyPhoto:(id<MWPhoto>)photo {
-    if ([photo underlyingImage]) {
-        [[UIPasteboard generalPasteboard] setData:UIImagePNGRepresentation([photo underlyingImage])
+- (void)actuallyCopyMediaItem:(MWMediaItem *)mediaItem {
+    if ([mediaItem underlyingImage]) {
+        [[UIPasteboard generalPasteboard] setData:UIImagePNGRepresentation([mediaItem underlyingImage])
                                 forPasteboardType:@"public.png"];
         [self showProgressHUDCompleteMessage:NSLocalizedString(@"Copied", @"Informing the user an item has finished copying")];
         [self hideControlsAfterDelay]; // Continue as normal...
@@ -1425,19 +1425,19 @@
 }
 
 - (void)emailMediaItem {
-    id <MWPhoto> photo = [self mediaItemAtIndex:_currentPageIndex];
-    if ([photo underlyingImage]) {
+    MWMediaItem *mediaItem = [self mediaItemAtIndex:_currentPageIndex];
+    if ([mediaItem underlyingImage]) {
         [self showProgressHUDWithMessage:[NSString stringWithFormat:@"%@\u2026" , NSLocalizedString(@"Preparing", @"Displayed with ellipsis as 'Preparing...' when an item is in the process of being prepared")]];
-        [self performSelector:@selector(actuallyEmailPhoto:) withObject:photo afterDelay:0];
+        [self performSelector:@selector(actuallyEmailMediaItem:) withObject:mediaItem afterDelay:0];
     }
 }
 
-- (void)actuallyEmailPhoto:(id<MWPhoto>)photo {
-    if ([photo underlyingImage]) {
+- (void)actuallyEmailMediaItem:(MWMediaItem *)mediaItem {
+    if ([mediaItem underlyingImage]) {
         MFMailComposeViewController *emailer = [[MFMailComposeViewController alloc] init];
         emailer.mailComposeDelegate = self;
         [emailer setSubject:NSLocalizedString(@"Photo", nil)];
-        [emailer addAttachmentData:UIImagePNGRepresentation([photo underlyingImage]) mimeType:@"png" fileName:@"Photo.png"];
+        [emailer addAttachmentData:UIImagePNGRepresentation([mediaItem underlyingImage]) mimeType:@"png" fileName:@"Photo.png"];
         if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
             emailer.modalPresentationStyle = UIModalPresentationPageSheet;
         }

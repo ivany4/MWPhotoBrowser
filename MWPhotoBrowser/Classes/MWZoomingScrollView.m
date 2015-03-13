@@ -104,7 +104,7 @@
         }
     }
     _mediaItem = mediaItem;
-    UIImage *img = [_photoBrowser imageForPhoto:_mediaItem];
+    UIImage *img = [_photoBrowser imageForMediaItem:_mediaItem];
     if (img) {
         [self displayImage];
     } else {
@@ -124,7 +124,7 @@
 		self.contentSize = CGSizeMake(0, 0);
 		
 		// Get image from browser as it handles ordering of fetching
-		UIImage *img = [_photoBrowser imageForPhoto:_mediaItem];
+		UIImage *img = [_photoBrowser imageForMediaItem:_mediaItem];
 		if (img) {
 			
 			// Hide indicator
@@ -184,8 +184,8 @@
 
 - (void)setProgressFromNotification:(NSNotification *)notification {
     NSDictionary *dict = [notification object];
-    id <MWPhoto> photoWithProgress = [dict objectForKey:@"photo"];
-    if (photoWithProgress == self.mediaItem) {
+    MWMediaItem *mediaItemWithProgress = [dict objectForKey:@"mediaItem"];
+    if (mediaItemWithProgress == self.mediaItem) {
         float progress = [[dict valueForKey:@"progress"] floatValue];
         _loadingIndicator.progress = MAX(MIN(1, progress), 0);
     }

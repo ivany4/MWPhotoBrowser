@@ -66,7 +66,6 @@
 		4C6F96F614AF710800F8389A /* MBProgressHUD.h in Headers */ = {isa = PBXBuildFile; fileRef = 4C6F96F414AF710800F8389A /* MBProgressHUD.h */; };
 		4C6F96F714AF710800F8389A /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C6F96F514AF710800F8389A /* MBProgressHUD.m */; };
 		4C6F97C714AF74E200F8389A /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C6F97C614AF74E200F8389A /* MessageUI.framework */; };
-		4CB08BA314B1F38700730E9F /* MWPhotoProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 4CB08BA214B1F38700730E9F /* MWPhotoProtocol.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -132,7 +131,6 @@
 		4C6F96F414AF710800F8389A /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MBProgressHUD.h; path = Libraries/MBProgressHUD/MBProgressHUD.h; sourceTree = SOURCE_ROOT; };
 		4C6F96F514AF710800F8389A /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MBProgressHUD.m; path = Libraries/MBProgressHUD/MBProgressHUD.m; sourceTree = SOURCE_ROOT; };
 		4C6F97C614AF74E200F8389A /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
-		4CB08BA214B1F38700730E9F /* MWPhotoProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MWPhotoProtocol.h; path = Classes/MWPhotoProtocol.h; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -204,7 +202,6 @@
 				4C6F96D914AF70BD00F8389A /* MWPhoto.m */,
 				2CA395151AB188130061494C /* MWMediaItem.h */,
 				2CA395161AB188130061494C /* MWMediaItem.m */,
-				4CB08BA214B1F38700730E9F /* MWPhotoProtocol.h */,
 				4C6F96D614AF70BD00F8389A /* MWCaptionView.h */,
 				4C6F96D714AF70BD00F8389A /* MWCaptionView.m */,
 				4C6F96EF14AF70DC00F8389A /* MWPhotoBrowser.bundle */,
@@ -319,7 +316,6 @@
 				4C6F96EA14AF70BD00F8389A /* MWTapDetectingView.h in Headers */,
 				4C6F96EC14AF70BD00F8389A /* MWZoomingScrollView.h in Headers */,
 				4C6F96F614AF710800F8389A /* MBProgressHUD.h in Headers */,
-				4CB08BA314B1F38700730E9F /* MWPhotoProtocol.h in Headers */,
 				2CA395171AB188130061494C /* MWMediaItem.h in Headers */,
 				0E17D77717FAEADE0094ABF6 /* UIImage+GIF.h in Headers */,
 				0EFEA24D17FB08B400E451B6 /* MWCommon.h in Headers */,

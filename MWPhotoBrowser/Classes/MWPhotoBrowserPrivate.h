@@ -107,7 +107,7 @@
 // Data
 - (NSUInteger)numberOfPhotos;
 - (MWMediaItem *)mediaItemAtIndex:(NSUInteger)index;
-- (UIImage *)imageForPhoto:(id<MWPhoto>)photo;
+- (UIImage *)imageForMediaItem:(MWMediaItem *)mediaItem;
 - (BOOL)mediaItemIsSelectedAtIndex:(NSUInteger)index;
 - (void)setMediaItemSelected:(BOOL)selected atIndex:(NSUInteger)index;
 - (void)loadAdjacentMediaItemsIfNecessary:(MWMediaItem *)mediaItem;
