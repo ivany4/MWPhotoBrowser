@@ -8,8 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import <MessageUI/MessageUI.h>
-#import "MWPhoto.h"
-#import "MWPhotoProtocol.h"
+#import "MWMediaItem.h"
 #import "MWCaptionView.h"
 
 // Debug Logging
@@ -23,19 +22,19 @@
 
 @protocol MWPhotoBrowserDelegate <NSObject>
 
-- (NSUInteger)numberOfPhotosInPhotoBrowser:(MWPhotoBrowser *)photoBrowser;
-- (id <MWPhoto>)photoBrowser:(MWPhotoBrowser *)photoBrowser photoAtIndex:(NSUInteger)index;
+- (NSUInteger)numberOfMediaItemsInBrowser:(MWPhotoBrowser *)browser;
+- (MWMediaItem *)browser:(MWPhotoBrowser *)browser mediaItemAtIndex:(NSUInteger)index;
 
 @optional
 
-- (id <MWPhoto>)photoBrowser:(MWPhotoBrowser *)photoBrowser thumbPhotoAtIndex:(NSUInteger)index;
-- (MWCaptionView *)photoBrowser:(MWPhotoBrowser *)photoBrowser captionViewForPhotoAtIndex:(NSUInteger)index;
-- (NSString *)photoBrowser:(MWPhotoBrowser *)photoBrowser titleForPhotoAtIndex:(NSUInteger)index;
-- (void)photoBrowser:(MWPhotoBrowser *)photoBrowser didDisplayPhotoAtIndex:(NSUInteger)index;
-- (void)photoBrowser:(MWPhotoBrowser *)photoBrowser actionButtonPressedForPhotoAtIndex:(NSUInteger)index;
-- (BOOL)photoBrowser:(MWPhotoBrowser *)photoBrowser isPhotoSelectedAtIndex:(NSUInteger)index;
-- (void)photoBrowser:(MWPhotoBrowser *)photoBrowser photoAtIndex:(NSUInteger)index selectedChanged:(BOOL)selected;
-- (void)photoBrowserDidFinishModalPresentation:(MWPhotoBrowser *)photoBrowser;
+- (id <MWPhoto>)browser:(MWPhotoBrowser *)browser thumbnailAtIndex:(NSUInteger)index;
+- (MWCaptionView *)browser:(MWPhotoBrowser *)browser captionViewForMediaItemAtIndex:(NSUInteger)index;
+- (NSString *)browser:(MWPhotoBrowser *)browser titleForMediaItemAtIndex:(NSUInteger)index;
+- (void)browser:(MWPhotoBrowser *)browser didDisplayMediaItemAtIndex:(NSUInteger)index;
+- (void)browser:(MWPhotoBrowser *)browser actionButtonPressedForMediaItemAtIndex:(NSUInteger)index;
+- (BOOL)browser:(MWPhotoBrowser *)browser isMediaItemSelectedAtIndex:(NSUInteger)index;
+- (void)browser:(MWPhotoBrowser *)browser mediaItemAtIndex:(NSUInteger)index selectedChanged:(BOOL)selected;
+- (void)browserDidFinishModalPresentation:(MWPhotoBrowser *)browser;
 
 @end
 
@@ -54,18 +53,16 @@
 @property (nonatomic, readonly) NSUInteger currentIndex;
 
 // Init
-- (id)initWithPhotos:(NSArray *)photosArray  __attribute__((deprecated("Use initWithDelegate: instead"))); // Depreciated
 - (id)initWithDelegate:(id <MWPhotoBrowserDelegate>)delegate;
 
-// Reloads the photo browser and refetches data
+// Reloads the browser and refetches data
 - (void)reloadData;
 
 // Set page that photo browser starts on
-- (void)setCurrentPhotoIndex:(NSUInteger)index;
-- (void)setInitialPageIndex:(NSUInteger)index  __attribute__((deprecated("Use setCurrentPhotoIndex: instead"))); // Depreciated
+- (void)setCurrentMediaItemIndex:(NSUInteger)index;
 
 // Navigation
-- (void)showNextPhotoAnimated:(BOOL)animated;
-- (void)showPreviousPhotoAnimated:(BOOL)animated;
+- (void)showNextMediaItemAnimated:(BOOL)animated;
+- (void)showPreviousMediaItemAnimated:(BOOL)animated;
 
 @end

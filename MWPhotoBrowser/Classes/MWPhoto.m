@@ -30,41 +30,26 @@
 
 #pragma mark - Class Methods
 
-+ (MWPhoto *)photoWithImage:(UIImage *)image {
++ (instancetype)photoWithImage:(UIImage *)image {
 	return [[MWPhoto alloc] initWithImage:image];
-}
-
-// Deprecated
-+ (MWPhoto *)photoWithFilePath:(NSString *)path {
-    return [MWPhoto photoWithURL:[NSURL fileURLWithPath:path]];
-}
-
-+ (MWPhoto *)photoWithURL:(NSURL *)url {
-	return [[MWPhoto alloc] initWithURL:url];
 }
 
 #pragma mark - Init
 
 - (id)initWithImage:(UIImage *)image {
 	if ((self = [super init])) {
+        self.isVideo = NO;
 		_image = image;
 	}
 	return self;
 }
 
-// Deprecated
-- (id)initWithFilePath:(NSString *)path {
-	if ((self = [super init])) {
-		_photoURL = [NSURL fileURLWithPath:path];
-	}
-	return self;
-}
-
-- (id)initWithURL:(NSURL *)url {
-	if ((self = [super init])) {
-		_photoURL = [url copy];
-	}
-	return self;
+- (id)initWithURL:(NSURL *)url
+{
+    if (self = [super initWithURL:url]) {
+        self.isVideo = NO;
+    }
+    return self;
 }
 
 #pragma mark - MWPhoto Protocol Methods
@@ -103,17 +88,17 @@
         self.underlyingImage = _image;
         [self imageLoadingComplete];
         
-    } else if (_photoURL) {
+    } else if (self.URL) {
         
         // Check what type of url it is
-        if ([[[_photoURL scheme] lowercaseString] isEqualToString:@"assets-library"]) {
+        if ([[[self.URL scheme] lowercaseString] isEqualToString:@"assets-library"]) {
             
             // Load from asset library async
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                 @autoreleasepool {
                     @try {
                         ALAssetsLibrary *assetslibrary = [[ALAssetsLibrary alloc] init];
-                        [assetslibrary assetForURL:_photoURL
+                        [assetslibrary assetForURL:self.URL
                                        resultBlock:^(ALAsset *asset){
                                            ALAssetRepresentation *rep = [asset defaultRepresentation];
                                            CGImageRef iref = [rep fullScreenImage];
@@ -134,15 +119,15 @@
                 }
             });
             
-        } else if ([_photoURL isFileReferenceURL]) {
+        } else if ([self.URL isFileReferenceURL]) {
             
             // Load from local file async
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                 @autoreleasepool {
                     @try {
-                        self.underlyingImage = [UIImage imageWithContentsOfFile:_photoURL.path];
+                        self.underlyingImage = [UIImage imageWithContentsOfFile:self.URL.path];
                         if (!_underlyingImage) {
-                            MWLog(@"Error loading photo from path: %@", _photoURL.path);
+                            MWLog(@"Error loading photo from path: %@", self.URL.path);
                         }
                     } @finally {
                         [self performSelectorOnMainThread:@selector(imageLoadingComplete) withObject:nil waitUntilDone:NO];
@@ -155,7 +140,7 @@
             // Load async from web (using SDWebImage)
             @try {
                 SDWebImageManager *manager = [SDWebImageManager sharedManager];
-                _webImageOperation = [manager downloadImageWithURL:_photoURL
+                _webImageOperation = [manager downloadImageWithURL:self.URL
                                                            options:0
                                                           progress:^(NSInteger receivedSize, NSInteger expectedSize) {
                                                               if (expectedSize > 0) {

@@ -33,13 +33,6 @@
 	return self;
 }
 
-- (id)initWithPhotos:(NSArray *)photosArray {
-	if ((self = [self init])) {
-		_depreciatedPhotoData = photosArray;
-	}
-	return self;
-}
-
 - (id)initWithCoder:(NSCoder *)decoder {
 	if ((self = [super initWithCoder:decoder])) {
         [self _initialisation];
@@ -61,7 +54,7 @@
 #endif
     self.hidesBottomBarWhenPushed = YES;
     _hasBelongedToViewController = NO;
-    _photoCount = NSNotFound;
+    _mediaItemCount = NSNotFound;
     _previousLayoutBounds = CGRectZero;
     _currentPageIndex = 0;
     _previousPageIndex = NSUIntegerMax;
@@ -77,8 +70,8 @@
     _delayToHideElements = 5;
     _visiblePages = [[NSMutableSet alloc] init];
     _recycledPages = [[NSMutableSet alloc] init];
-    _photos = [[NSMutableArray alloc] init];
-    _thumbPhotos = [[NSMutableArray alloc] init];
+    _mediaItems = [[NSMutableArray alloc] init];
+    _thumbnails = [[NSMutableArray alloc] init];
     _currentGridContentOffset = CGPointMake(0, CGFLOAT_MAX);
     _didSavePreviousStateOfNavBar = NO;
     if ([self respondsToSelector:@selector(automaticallyAdjustsScrollViewInsets)]){
@@ -103,17 +96,17 @@
 - (void)releaseAllUnderlyingPhotos:(BOOL)preserveCurrent {
     // Create a copy in case this array is modified while we are looping through
     // Release photos
-    NSArray *copy = [_photos copy];
+    NSArray *copy = [_mediaItems copy];
     for (id p in copy) {
         if (p != [NSNull null]) {
-            if (preserveCurrent && p == [self photoAtIndex:self.currentIndex]) {
+            if (preserveCurrent && p == [self mediaItemAtIndex:self.currentIndex]) {
                 continue; // skip current
             }
             [p unloadUnderlyingImage];
         }
     }
     // Release thumbs
-    copy = [_thumbPhotos copy];
+    copy = [_thumbnails copy];
     for (id p in copy) {
         if (p != [NSNull null]) {
             [p unloadUnderlyingImage];
@@ -140,7 +133,7 @@
     // Validate grid settings
     if (_startOnGrid) _enableGrid = YES;
     if (_enableGrid) {
-        _enableGrid = [_delegate respondsToSelector:@selector(photoBrowser:thumbPhotoAtIndex:)];
+        _enableGrid = [_delegate respondsToSelector:@selector(browser:thumbnailAtIndex:)];
     }
     if (!_enableGrid) _startOnGrid = NO;
 	
@@ -309,19 +302,6 @@
     
 }
 
-// Release any retained subviews of the main view.
-- (void)viewDidUnload {
-	_currentPageIndex = 0;
-    _pagingScrollView = nil;
-    _visiblePages = nil;
-    _recycledPages = nil;
-    _toolbar = nil;
-    _previousButton = nil;
-    _nextButton = nil;
-    _progressHUD = nil;
-    [super viewDidUnload];
-}
-
 - (BOOL)presentingViewControllerPrefersStatusBarHidden {
     UIViewController *presenting = self.presentingViewController;
     if (presenting) {
@@ -358,20 +338,9 @@
         // If the frame is zero then definitely leave it alone
         _leaveStatusBarAlone = YES;
     }
-    BOOL fullScreen = YES;
-#if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_7_0
-    if (SYSTEM_VERSION_LESS_THAN(@"7")) fullScreen = self.wantsFullScreenLayout;
-#endif
-    if (!_leaveStatusBarAlone && fullScreen && UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+    if (!_leaveStatusBarAlone && UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
         _previousStatusBarStyle = [[UIApplication sharedApplication] statusBarStyle];
-        if (SYSTEM_VERSION_LESS_THAN(@"7")) {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-            [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackTranslucent animated:animated];
-#pragma clang diagnostic push
-        } else {
-            [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:animated];
-        }
+        [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:animated];
     }
     
     // Navigation bar appearance
@@ -413,11 +382,7 @@
     [self setControlsHidden:NO animated:NO permanent:YES];
     
     // Status bar
-    BOOL fullScreen = YES;
-#if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_7_0
-    if (SYSTEM_VERSION_LESS_THAN(@"7")) fullScreen = self.wantsFullScreenLayout;
-#endif
-    if (!_leaveStatusBarAlone && fullScreen && UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+    if (!_leaveStatusBarAlone && UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
         [[UIApplication sharedApplication] setStatusBarStyle:_previousStatusBarStyle animated:animated];
     }
     
@@ -446,7 +411,7 @@
 - (void)setNavBarAppearance:(BOOL)animated {
     [self.navigationController setNavigationBarHidden:NO animated:animated];
     UINavigationBar *navBar = self.navigationController.navigationBar;
-    navBar.tintColor = SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7") ? [UIColor whiteColor] : nil;
+    navBar.tintColor = [UIColor whiteColor];
     if ([navBar respondsToSelector:@selector(setBarTintColor:)]) {
         navBar.barTintColor = nil;
         navBar.shadowImage = nil;
@@ -612,16 +577,16 @@
 - (void)reloadData {
     
     // Reset
-    _photoCount = NSNotFound;
+    _mediaItemCount = NSNotFound;
     
     // Get data
     NSUInteger numberOfPhotos = [self numberOfPhotos];
     [self releaseAllUnderlyingPhotos:YES];
-    [_photos removeAllObjects];
-    [_thumbPhotos removeAllObjects];
+    [_mediaItems removeAllObjects];
+    [_thumbnails removeAllObjects];
     for (int i = 0; i < numberOfPhotos; i++) {
-        [_photos addObject:[NSNull null]];
-        [_thumbPhotos addObject:[NSNull null]];
+        [_mediaItems addObject:[NSNull null]];
+        [_thumbnails addObject:[NSNull null]];
     }
 
     // Update current page index
@@ -643,77 +608,73 @@
 }
 
 - (NSUInteger)numberOfPhotos {
-    if (_photoCount == NSNotFound) {
-        if ([_delegate respondsToSelector:@selector(numberOfPhotosInPhotoBrowser:)]) {
-            _photoCount = [_delegate numberOfPhotosInPhotoBrowser:self];
-        } else if (_depreciatedPhotoData) {
-            _photoCount = _depreciatedPhotoData.count;
+    if (_mediaItemCount == NSNotFound) {
+        if ([_delegate respondsToSelector:@selector(numberOfMediaItemsInBrowser:)]) {
+            _mediaItemCount = [_delegate numberOfMediaItemsInBrowser:self];
         }
     }
-    if (_photoCount == NSNotFound) _photoCount = 0;
-    return _photoCount;
+    if (_mediaItemCount == NSNotFound) _mediaItemCount = 0;
+    return _mediaItemCount;
 }
 
-- (id<MWPhoto>)photoAtIndex:(NSUInteger)index {
-    id <MWPhoto> photo = nil;
-    if (index < _photos.count) {
-        if ([_photos objectAtIndex:index] == [NSNull null]) {
-            if ([_delegate respondsToSelector:@selector(photoBrowser:photoAtIndex:)]) {
-                photo = [_delegate photoBrowser:self photoAtIndex:index];
-            } else if (_depreciatedPhotoData && index < _depreciatedPhotoData.count) {
-                photo = [_depreciatedPhotoData objectAtIndex:index];
+- (MWMediaItem *)mediaItemAtIndex:(NSUInteger)index {
+    MWMediaItem *mediaItem = nil;
+    if (index < _mediaItems.count) {
+        if ([_mediaItems objectAtIndex:index] == [NSNull null]) {
+            if ([_delegate respondsToSelector:@selector(browser:mediaItemAtIndex:)]) {
+                mediaItem = [_delegate browser:self mediaItemAtIndex:index];
             }
-            if (photo) [_photos replaceObjectAtIndex:index withObject:photo];
+            if (mediaItem) [_mediaItems replaceObjectAtIndex:index withObject:mediaItem];
         } else {
-            photo = [_photos objectAtIndex:index];
+            mediaItem = [_mediaItems objectAtIndex:index];
         }
     }
-    return photo;
+    return mediaItem;
 }
 
-- (id<MWPhoto>)thumbPhotoAtIndex:(NSUInteger)index {
-    id <MWPhoto> photo = nil;
-    if (index < _thumbPhotos.count) {
-        if ([_thumbPhotos objectAtIndex:index] == [NSNull null]) {
-            if ([_delegate respondsToSelector:@selector(photoBrowser:thumbPhotoAtIndex:)]) {
-                photo = [_delegate photoBrowser:self thumbPhotoAtIndex:index];
+- (MWMediaItem *)thumbnailAtIndex:(NSUInteger)index {
+    MWMediaItem *mediaItem = nil;
+    if (index < _thumbnails.count) {
+        if ([_thumbnails objectAtIndex:index] == [NSNull null]) {
+            if ([_delegate respondsToSelector:@selector(browser:thumbnailAtIndex:)]) {
+                mediaItem = [_delegate browser:self thumbnailAtIndex:index];
             }
-            if (photo) [_thumbPhotos replaceObjectAtIndex:index withObject:photo];
+            if (mediaItem) [_thumbnails replaceObjectAtIndex:index withObject:mediaItem];
         } else {
-            photo = [_thumbPhotos objectAtIndex:index];
+            mediaItem = [_thumbnails objectAtIndex:index];
         }
     }
-    return photo;
+    return mediaItem;
 }
 
 - (MWCaptionView *)captionViewForPhotoAtIndex:(NSUInteger)index {
     MWCaptionView *captionView = nil;
-    if ([_delegate respondsToSelector:@selector(photoBrowser:captionViewForPhotoAtIndex:)]) {
-        captionView = [_delegate photoBrowser:self captionViewForPhotoAtIndex:index];
+    if ([_delegate respondsToSelector:@selector(browser:captionViewForMediaItemAtIndex:)]) {
+        captionView = [_delegate browser:self captionViewForMediaItemAtIndex:index];
     } else {
-        id <MWPhoto> photo = [self photoAtIndex:index];
-        if ([photo respondsToSelector:@selector(caption)]) {
-            if ([photo caption]) captionView = [[MWCaptionView alloc] initWithPhoto:photo];
+        MWMediaItem *mediaItem = [self mediaItemAtIndex:index];
+        if ([mediaItem respondsToSelector:@selector(caption)]) {
+            if ([mediaItem caption]) captionView = [[MWCaptionView alloc] initWithMediaItem:mediaItem];
         }
     }
     captionView.alpha = [self areControlsHidden] ? 0 : 1; // Initial alpha
     return captionView;
 }
 
-- (BOOL)photoIsSelectedAtIndex:(NSUInteger)index {
+- (BOOL)mediaItemIsSelectedAtIndex:(NSUInteger)index {
     BOOL value = NO;
     if (_displaySelectionButtons) {
-        if ([self.delegate respondsToSelector:@selector(photoBrowser:isPhotoSelectedAtIndex:)]) {
-            value = [self.delegate photoBrowser:self isPhotoSelectedAtIndex:index];
+        if ([self.delegate respondsToSelector:@selector(browser:isMediaItemSelectedAtIndex:)]) {
+            value = [self.delegate browser:self isMediaItemSelectedAtIndex:index];
         }
     }
     return value;
 }
 
-- (void)setPhotoSelected:(BOOL)selected atIndex:(NSUInteger)index {
+- (void)setMediaItemSelected:(BOOL)selected atIndex:(NSUInteger)index {
     if (_displaySelectionButtons) {
-        if ([self.delegate respondsToSelector:@selector(photoBrowser:photoAtIndex:selectedChanged:)]) {
-            [self.delegate photoBrowser:self photoAtIndex:index selectedChanged:selected];
+        if ([self.delegate respondsToSelector:@selector(browser:mediaItemAtIndex:selectedChanged:)]) {
+            [self.delegate browser:self mediaItemAtIndex:index selectedChanged:selected];
         }
     }
 }
@@ -730,25 +691,25 @@
 	return nil;
 }
 
-- (void)loadAdjacentPhotosIfNecessary:(id<MWPhoto>)photo {
-    MWZoomingScrollView *page = [self pageDisplayingPhoto:photo];
+- (void)loadAdjacentMediaItemsIfNecessary:(MWMediaItem *)mediaItem {
+    MWZoomingScrollView *page = [self pageDisplayingMediaItem:mediaItem];
     if (page) {
         // If page is current page then initiate loading of previous and next pages
         NSUInteger pageIndex = page.index;
         if (_currentPageIndex == pageIndex) {
             if (pageIndex > 0) {
                 // Preload index - 1
-                id <MWPhoto> photo = [self photoAtIndex:pageIndex-1];
-                if (![photo underlyingImage]) {
-                    [photo loadUnderlyingImageAndNotify];
+                MWMediaItem *mediaItem = [self mediaItemAtIndex:pageIndex-1];
+                if (![mediaItem underlyingImage]) {
+                    [mediaItem loadUnderlyingImageAndNotify];
                     MWLog(@"Pre-loading image at index %lu", (unsigned long)pageIndex-1);
                 }
             }
             if (pageIndex < [self numberOfPhotos] - 1) {
                 // Preload index + 1
-                id <MWPhoto> photo = [self photoAtIndex:pageIndex+1];
-                if (![photo underlyingImage]) {
-                    [photo loadUnderlyingImageAndNotify];
+                MWMediaItem *mediaItem = [self mediaItemAtIndex:pageIndex+1];
+                if (![mediaItem underlyingImage]) {
+                    [mediaItem loadUnderlyingImageAndNotify];
                     MWLog(@"Pre-loading image at index %lu", (unsigned long)pageIndex+1);
                 }
             }
@@ -760,12 +721,12 @@
 
 - (void)handleMWPhotoLoadingDidEndNotification:(NSNotification *)notification {
     id <MWPhoto> photo = [notification object];
-    MWZoomingScrollView *page = [self pageDisplayingPhoto:photo];
+    MWZoomingScrollView *page = [self pageDisplayingMediaItem:photo];
     if (page) {
         if ([photo underlyingImage]) {
             // Successful load
             [page displayImage];
-            [self loadAdjacentPhotosIfNecessary:photo];
+            [self loadAdjacentMediaItemsIfNecessary:photo];
         } else {
             // Failed to load
             [page displayImageFailure];
@@ -814,7 +775,7 @@
             // Add new page
 			MWZoomingScrollView *page = [self dequeueRecycledPage];
 			if (!page) {
-				page = [[MWZoomingScrollView alloc] initWithPhotoBrowser:self];
+				page = [[MWZoomingScrollView alloc] initWithBrowser:self];
 			}
 			[_visiblePages addObject:page];
 			[self configurePage:page forIndex:index];
@@ -841,7 +802,7 @@
                 selectedButton.frame = [self frameForSelectedButton:selectedButton atIndex:index];
                 [_pagingScrollView addSubview:selectedButton];
                 page.selectedButton = selectedButton;
-                selectedButton.selected = [self photoIsSelectedAtIndex:index];
+                selectedButton.selected = [self mediaItemIsSelectedAtIndex:index];
             }
             
 		}
@@ -854,7 +815,7 @@
     for (MWZoomingScrollView *page in copy) {
         
         // Update selection
-        page.selectedButton.selected = [self photoIsSelectedAtIndex:page.index];
+        page.selectedButton.selected = [self mediaItemIsSelectedAtIndex:page.index];
         
     }
 }
@@ -875,10 +836,11 @@
 	return thePage;
 }
 
-- (MWZoomingScrollView *)pageDisplayingPhoto:(id<MWPhoto>)photo {
+- (MWZoomingScrollView *)pageDisplayingMediaItem:(MWMediaItem *)mediaItem
+{
 	MWZoomingScrollView *thePage = nil;
 	for (MWZoomingScrollView *page in _visiblePages) {
-		if (page.photo == photo) {
+		if (page.mediaItem == photo) {
 			thePage = page; break;
 		}
 	}
@@ -888,7 +850,7 @@
 - (void)configurePage:(MWZoomingScrollView *)page forIndex:(NSUInteger)index {
 	page.frame = [self frameForPageAtIndex:index];
     page.index = index;
-    page.photo = [self photoAtIndex:index];
+    page.mediaItem = [self mediaItemAtIndex:index];
 }
 
 - (MWZoomingScrollView *)dequeueRecycledPage {
@@ -913,21 +875,21 @@
     if (index > 0) {
         // Release anything < index - 1
         for (i = 0; i < index-1; i++) { 
-            id photo = [_photos objectAtIndex:i];
+            id photo = [_mediaItems objectAtIndex:i];
             if (photo != [NSNull null]) {
                 [photo unloadUnderlyingImage];
-                [_photos replaceObjectAtIndex:i withObject:[NSNull null]];
+                [_mediaItems replaceObjectAtIndex:i withObject:[NSNull null]];
                 MWLog(@"Released underlying image at index %lu", (unsigned long)i);
             }
         }
     }
     if (index < [self numberOfPhotos] - 1) {
         // Release anything > index + 1
-        for (i = index + 2; i < _photos.count; i++) {
-            id photo = [_photos objectAtIndex:i];
+        for (i = index + 2; i < _mediaItems.count; i++) {
+            id photo = [_mediaItems objectAtIndex:i];
             if (photo != [NSNull null]) {
                 [photo unloadUnderlyingImage];
-                [_photos replaceObjectAtIndex:i withObject:[NSNull null]];
+                [_mediaItems replaceObjectAtIndex:i withObject:[NSNull null]];
                 MWLog(@"Released underlying image at index %lu", (unsigned long)i);
             }
         }
@@ -935,16 +897,16 @@
     
     // Load adjacent images if needed and the photo is already
     // loaded. Also called after photo has been loaded in background
-    id <MWPhoto> currentPhoto = [self photoAtIndex:index];
+    id <MWPhoto> currentPhoto = [self mediaItemAtIndex:index];
     if ([currentPhoto underlyingImage]) {
         // photo loaded so load ajacent now
-        [self loadAdjacentPhotosIfNecessary:currentPhoto];
+        [self loadAdjacentMediaItemsIfNecessary:currentPhoto];
     }
     
     // Notify delegate
     if (index != _previousPageIndex) {
         if ([_delegate respondsToSelector:@selector(photoBrowser:didDisplayPhotoAtIndex:)])
-            [_delegate photoBrowser:self didDisplayPhotoAtIndex:index];
+            [_delegate browser:self didDisplayMediaItemAtIndex:index];
         _previousPageIndex = index;
     }
     
@@ -1074,7 +1036,7 @@
         }
     } else if (numberOfPhotos > 1) {
         if ([_delegate respondsToSelector:@selector(photoBrowser:titleForPhotoAtIndex:)]) {
-            self.title = [_delegate photoBrowser:self titleForPhotoAtIndex:_currentPageIndex];
+            self.title = [_delegate browser:self titleForMediaItemAtIndex:_currentPageIndex];
         } else {
             self.title = [NSString stringWithFormat:@"%lu %@ %lu", (unsigned long)(_currentPageIndex+1), NSLocalizedString(@"of", @"Used in the context: 'Showing 1 of 3 items'"), (unsigned long)numberOfPhotos];
         }
@@ -1085,7 +1047,7 @@
 	// Buttons
 	_previousButton.enabled = (_currentPageIndex > 0);
 	_nextButton.enabled = (_currentPageIndex < numberOfPhotos - 1);
-    _actionButton.enabled = [[self photoAtIndex:_currentPageIndex] underlyingImage] != nil;
+    _actionButton.enabled = [[self mediaItemAtIndex:_currentPageIndex] underlyingImage] != nil;
 	
 }
 
@@ -1104,17 +1066,17 @@
 }
 
 - (void)gotoPreviousPage {
-    [self showPreviousPhotoAnimated:NO];
+    [self showPreviousMediaItemAnimated:NO];
 }
 - (void)gotoNextPage {
-    [self showNextPhotoAnimated:NO];
+    [self showNextMediaItemAnimated:NO];
 }
 
-- (void)showPreviousPhotoAnimated:(BOOL)animated {
+- (void)showPreviousMediaItemAnimated:(BOOL)animated {
     [self jumpToPageAtIndex:_currentPageIndex-1 animated:animated];
 }
 
-- (void)showNextPhotoAnimated:(BOOL)animated {
+- (void)showNextMediaItemAnimated:(BOOL)animated {
     [self jumpToPageAtIndex:_currentPageIndex+1 animated:animated];
 }
 
@@ -1131,7 +1093,7 @@
         }
     }
     if (index != NSUIntegerMax) {
-        [self setPhotoSelected:selectedButton.selected atIndex:index];
+        [self setMediaItemSelected:selectedButton.selected atIndex:index];
     }
 }
 
@@ -1400,12 +1362,7 @@
 
 #pragma mark - Properties
 
-// Handle depreciated method
-- (void)setInitialPageIndex:(NSUInteger)index {
-    [self setCurrentPhotoIndex:index];
-}
-
-- (void)setCurrentPhotoIndex:(NSUInteger)index {
+- (void)setCurrentMediaItemIndex:(NSUInteger)index {
     // Validate
     NSUInteger photoCount = [self numberOfPhotos];
     if (photoCount == 0) {
@@ -1440,7 +1397,7 @@
         // Dismiss view controller
         if ([_delegate respondsToSelector:@selector(photoBrowserDidFinishModalPresentation:)]) {
             // Call delegate method and let them dismiss us
-            [_delegate photoBrowserDidFinishModalPresentation:self];
+            [_delegate browserDidFinishModalPresentation:self];
         } else  {
             [self dismissViewControllerAnimated:YES completion:nil];
         }
@@ -1458,14 +1415,14 @@
     } else {
         
         // Only react when image has loaded
-        id <MWPhoto> photo = [self photoAtIndex:_currentPageIndex];
+        id <MWPhoto> photo = [self mediaItemAtIndex:_currentPageIndex];
         if ([self numberOfPhotos] > 0 && [photo underlyingImage]) {
             
             // If they have defined a delegate method then just message them
             if ([self.delegate respondsToSelector:@selector(photoBrowser:actionButtonPressedForPhotoAtIndex:)]) {
                 
                 // Let delegate handle things
-                [self.delegate photoBrowser:self actionButtonPressedForPhotoAtIndex:_currentPageIndex];
+                [self.delegate browser:self actionButtonPressedForMediaItemAtIndex:_currentPageIndex];
                 
             } else {
                 
@@ -1540,11 +1497,11 @@
         _actionsSheet = nil;
         if (buttonIndex != actionSheet.cancelButtonIndex) {
             if (buttonIndex == actionSheet.firstOtherButtonIndex) {
-                [self savePhoto]; return;
+                [self saveMediaItem]; return;
             } else if (buttonIndex == actionSheet.firstOtherButtonIndex + 1) {
-                [self copyPhoto]; return;	
+                [self copyMediaItem]; return;	
             } else if (buttonIndex == actionSheet.firstOtherButtonIndex + 2) {
-                [self emailPhoto]; return;
+                [self emailMediaItem]; return;
             }
         }
     }
@@ -1593,8 +1550,8 @@
 
 #pragma mark - Actions
 
-- (void)savePhoto {
-    id <MWPhoto> photo = [self photoAtIndex:_currentPageIndex];
+- (void)saveMediaItem {
+    MWMediaItem *photo = [self mediaItemAtIndex:_currentPageIndex];
     if ([photo underlyingImage]) {
         [self showProgressHUDWithMessage:[NSString stringWithFormat:@"%@\u2026" , NSLocalizedString(@"Saving", @"Displayed with ellipsis as 'Saving...' when an item is in the process of being saved")]];
         [self performSelector:@selector(actuallySavePhoto:) withObject:photo afterDelay:0];
@@ -1613,8 +1570,8 @@
     [self hideControlsAfterDelay]; // Continue as normal...
 }
 
-- (void)copyPhoto {
-    id <MWPhoto> photo = [self photoAtIndex:_currentPageIndex];
+- (void)copyMediaItem {
+    id <MWPhoto> photo = [self mediaItemAtIndex:_currentPageIndex];
     if ([photo underlyingImage]) {
         [self showProgressHUDWithMessage:[NSString stringWithFormat:@"%@\u2026" , NSLocalizedString(@"Copying", @"Displayed with ellipsis as 'Copying...' when an item is in the process of being copied")]];
         [self performSelector:@selector(actuallyCopyPhoto:) withObject:photo afterDelay:0];
@@ -1630,8 +1587,8 @@
     }
 }
 
-- (void)emailPhoto {
-    id <MWPhoto> photo = [self photoAtIndex:_currentPageIndex];
+- (void)emailMediaItem {
+    id <MWPhoto> photo = [self mediaItemAtIndex:_currentPageIndex];
     if ([photo underlyingImage]) {
         [self showProgressHUDWithMessage:[NSString stringWithFormat:@"%@\u2026" , NSLocalizedString(@"Preparing", @"Displayed with ellipsis as 'Preparing...' when an item is in the process of being prepared")]];
         [self performSelector:@selector(actuallyEmailPhoto:) withObject:photo afterDelay:0];

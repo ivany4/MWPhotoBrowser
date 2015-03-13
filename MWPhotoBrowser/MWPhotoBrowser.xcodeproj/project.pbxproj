@@ -80,6 +80,8 @@
 		2615E44C18CD57C700447857 /* NSData+ImageContentType.m in Sources */ = {isa = PBXBuildFile; fileRef = 2615E44A18CD57C700447857 /* NSData+ImageContentType.m */; };
 		2615E44F18CD57E500447857 /* MKAnnotationView+WebCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 2615E44D18CD57E500447857 /* MKAnnotationView+WebCache.h */; };
 		2615E45018CD57E500447857 /* MKAnnotationView+WebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 2615E44E18CD57E500447857 /* MKAnnotationView+WebCache.m */; };
+		2CA395171AB188130061494C /* MWMediaItem.h in Headers */ = {isa = PBXBuildFile; fileRef = 2CA395151AB188130061494C /* MWMediaItem.h */; };
+		2CA395181AB188130061494C /* MWMediaItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 2CA395161AB188130061494C /* MWMediaItem.m */; };
 		4C6F96C814AF704100F8389A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C6F96C714AF704100F8389A /* Foundation.framework */; };
 		4C6F96E214AF70BD00F8389A /* MWCaptionView.h in Headers */ = {isa = PBXBuildFile; fileRef = 4C6F96D614AF70BD00F8389A /* MWCaptionView.h */; };
 		4C6F96E314AF70BD00F8389A /* MWCaptionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C6F96D714AF70BD00F8389A /* MWCaptionView.m */; };
@@ -173,6 +175,8 @@
 		2615E44A18CD57C700447857 /* NSData+ImageContentType.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSData+ImageContentType.m"; path = "Libraries/SDWebImage/SDWebImage/NSData+ImageContentType.m"; sourceTree = SOURCE_ROOT; };
 		2615E44D18CD57E500447857 /* MKAnnotationView+WebCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "MKAnnotationView+WebCache.h"; path = "Libraries/SDWebImage/SDWebImage/MKAnnotationView+WebCache.h"; sourceTree = SOURCE_ROOT; };
 		2615E44E18CD57E500447857 /* MKAnnotationView+WebCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "MKAnnotationView+WebCache.m"; path = "Libraries/SDWebImage/SDWebImage/MKAnnotationView+WebCache.m"; sourceTree = SOURCE_ROOT; };
+		2CA395151AB188130061494C /* MWMediaItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MWMediaItem.h; path = MWPhotoBrowser/Classes/MWMediaItem.h; sourceTree = "<group>"; };
+		2CA395161AB188130061494C /* MWMediaItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MWMediaItem.m; path = MWPhotoBrowser/Classes/MWMediaItem.m; sourceTree = "<group>"; };
 		4C6F96C414AF704100F8389A /* libMWPhotoBrowser.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libMWPhotoBrowser.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C6F96C714AF704100F8389A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		4C6F96CB14AF704100F8389A /* MWPhotoBrowser-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MWPhotoBrowser-Prefix.pch"; sourceTree = SOURCE_ROOT; };
@@ -300,6 +304,8 @@
 				0E3D5898180467550000E3A0 /* MWGridViewController.m */,
 				4C6F96D814AF70BD00F8389A /* MWPhoto.h */,
 				4C6F96D914AF70BD00F8389A /* MWPhoto.m */,
+				2CA395151AB188130061494C /* MWMediaItem.h */,
+				2CA395161AB188130061494C /* MWMediaItem.m */,
 				4CB08BA214B1F38700730E9F /* MWPhotoProtocol.h */,
 				4C6F96D614AF70BD00F8389A /* MWCaptionView.h */,
 				4C6F96D714AF70BD00F8389A /* MWCaptionView.m */,
@@ -435,6 +441,7 @@
 				0E3D58BC180474330000E3A0 /* PSTCollectionViewCell.h in Headers */,
 				0E3D58CA180474330000E3A0 /* PSTCollectionViewUpdateItem.h in Headers */,
 				4CB08BA314B1F38700730E9F /* MWPhotoProtocol.h in Headers */,
+				2CA395171AB188130061494C /* MWMediaItem.h in Headers */,
 				0E17D77717FAEADE0094ABF6 /* UIImage+GIF.h in Headers */,
 				0EFEA24D17FB08B400E451B6 /* MWCommon.h in Headers */,
 				0EF66C6719CC8E0000BC267E /* UIView+WebCacheOperation.h in Headers */,
@@ -518,6 +525,7 @@
 				0E17D76F17FAEADE0094ABF6 /* SDWebImageDownloaderOperation.m in Sources */,
 				2615E45018CD57E500447857 /* MKAnnotationView+WebCache.m in Sources */,
 				0E17D76B17FAEADE0094ABF6 /* SDWebImageDecoder.m in Sources */,
+				2CA395181AB188130061494C /* MWMediaItem.m in Sources */,
 				0E17D77E17FAEADE0094ABF6 /* UIImageView+WebCache.m in Sources */,
 				4C6F96E714AF70BD00F8389A /* MWPhotoBrowser.m in Sources */,
 				0E3D58CF180474330000E3A0 /* PSTGridLayoutItem.m in Sources */,

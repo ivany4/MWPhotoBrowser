@@ -15,10 +15,9 @@
 @interface MWPhotoBrowser () {
     
 	// Data
-    NSUInteger _photoCount;
-    NSMutableArray *_photos;
-    NSMutableArray *_thumbPhotos;
-	NSArray *_depreciatedPhotoData; // Depreciated
+    NSUInteger _mediaItemCount;
+    NSMutableArray *_mediaItems;
+    NSMutableArray *_thumbnails;
 	
 	// Views
 	UIScrollView *_pagingScrollView;
@@ -86,7 +85,7 @@
 - (void)tilePages;
 - (BOOL)isDisplayingPageForIndex:(NSUInteger)index;
 - (MWZoomingScrollView *)pageDisplayedAtIndex:(NSUInteger)index;
-- (MWZoomingScrollView *)pageDisplayingPhoto:(id<MWPhoto>)photo;
+- (MWZoomingScrollView *)pageDisplayingMediaItem:(MWMediaItem *)mediaItem;
 - (MWZoomingScrollView *)dequeueRecycledPage;
 - (void)configurePage:(MWZoomingScrollView *)page forIndex:(NSUInteger)index;
 - (void)didStartViewingPageAtIndex:(NSUInteger)index;
@@ -119,18 +118,18 @@
 
 // Data
 - (NSUInteger)numberOfPhotos;
-- (id<MWPhoto>)photoAtIndex:(NSUInteger)index;
-- (id<MWPhoto>)thumbPhotoAtIndex:(NSUInteger)index;
+- (MWMediaItem *)mediaItemAtIndex:(NSUInteger)index;
+- (MWMediaItem *)thumbnailAtIndex:(NSUInteger)index;
 - (UIImage *)imageForPhoto:(id<MWPhoto>)photo;
-- (BOOL)photoIsSelectedAtIndex:(NSUInteger)index;
-- (void)setPhotoSelected:(BOOL)selected atIndex:(NSUInteger)index;
-- (void)loadAdjacentPhotosIfNecessary:(id<MWPhoto>)photo;
+- (BOOL)mediaItemIsSelectedAtIndex:(NSUInteger)index;
+- (void)setMediaItemSelected:(BOOL)selected atIndex:(NSUInteger)index;
+- (void)loadAdjacentMediaItemsIfNecessary:(MWMediaItem *)mediaItem;
 - (void)releaseAllUnderlyingPhotos:(BOOL)preserveCurrent;
 
 // Actions
-- (void)savePhoto;
-- (void)copyPhoto;
-- (void)emailPhoto;
+- (void)saveMediaItem;
+- (void)copyMediaItem;
+- (void)emailMediaItem;
 
 @end
 

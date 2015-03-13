@@ -157,11 +157,11 @@
     if (!cell) {
         cell = [[MWGridCell alloc] init];
     }
-    id <MWPhoto> photo = [_browser thumbPhotoAtIndex:indexPath.row];
+    id <MWPhoto> photo = [_browser thumbnailAtIndex:indexPath.row];
     cell.photo = photo;
     cell.gridController = self;
     cell.selectionMode = _selectionMode;
-    cell.isSelected = [_browser photoIsSelectedAtIndex:indexPath.row];
+    cell.isSelected = [_browser mediaItemIsSelectedAtIndex:indexPath.row];
     cell.index = indexPath.row;
     UIImage *img = [_browser imageForPhoto:photo];
     if (img) {
@@ -173,7 +173,7 @@
 }
 
 - (void)collectionView:(PSTCollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
-    [_browser setCurrentPhotoIndex:indexPath.row];
+    [_browser setCurrentMediaItemIndex:indexPath.row];
     [_browser hideGrid];
 }
 

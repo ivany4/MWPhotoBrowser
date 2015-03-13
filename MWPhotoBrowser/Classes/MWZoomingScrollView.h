@@ -18,11 +18,11 @@
 }
 
 @property () NSUInteger index;
-@property (nonatomic) id <MWPhoto> photo;
+@property (nonatomic) MWMediaItem *mediaItem;
 @property (nonatomic, weak) MWCaptionView *captionView;
 @property (nonatomic, weak) UIButton *selectedButton;
 
-- (id)initWithPhotoBrowser:(MWPhotoBrowser *)browser;
+- (id)initWithBrowser:(MWPhotoBrowser *)browser;
 - (void)displayImage;
 - (void)displayImageFailure;
 - (void)setMaxMinZoomScalesForCurrentBounds;

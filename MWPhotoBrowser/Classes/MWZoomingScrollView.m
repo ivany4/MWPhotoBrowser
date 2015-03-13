@@ -28,7 +28,7 @@
 
 @implementation MWZoomingScrollView
 
-- (id)initWithPhotoBrowser:(MWPhotoBrowser *)browser {
+- (id)initWithBrowser:(MWPhotoBrowser *)browser {
     if ((self = [super init])) {
         
         // Setup
@@ -87,7 +87,7 @@
 
 - (void)prepareForReuse {
     [self hideImageFailure];
-    self.photo = nil;
+    self.mediaItem = nil;
     self.captionView = nil;
     self.selectedButton = nil;
     _photoImageView.image = nil;
@@ -96,15 +96,15 @@
 
 #pragma mark - Image
 
-- (void)setPhoto:(id<MWPhoto>)photo {
+- (void)setMediaItem:(int *)mediaItem {
     // Cancel any loading on old photo
-    if (_photo && photo == nil) {
-        if ([_photo respondsToSelector:@selector(cancelAnyLoading)]) {
-            [_photo cancelAnyLoading];
+    if (_mediaItem && mediaItem == nil) {
+        if ([_mediaItem respondsToSelector:@selector(cancelAnyLoading)]) {
+            [_mediaItem cancelAnyLoading];
         }
     }
-    _photo = photo;
-    UIImage *img = [_photoBrowser imageForPhoto:_photo];
+    _mediaItem = photo;
+    UIImage *img = [_photoBrowser imageForPhoto:_mediaItem];
     if (img) {
         [self displayImage];
     } else {
@@ -115,7 +115,7 @@
 
 // Get and display image
 - (void)displayImage {
-	if (_photo && _photoImageView.image == nil) {
+	if (_mediaItem && _photoImageView.image == nil) {
 		
 		// Reset
 		self.maximumZoomScale = 1;
@@ -124,7 +124,7 @@
 		self.contentSize = CGSizeMake(0, 0);
 		
 		// Get image from browser as it handles ordering of fetching
-		UIImage *img = [_photoBrowser imageForPhoto:_photo];
+		UIImage *img = [_photoBrowser imageForPhoto:_mediaItem];
 		if (img) {
 			
 			// Hide indicator
@@ -185,7 +185,7 @@
 - (void)setProgressFromNotification:(NSNotification *)notification {
     NSDictionary *dict = [notification object];
     id <MWPhoto> photoWithProgress = [dict objectForKey:@"photo"];
-    if (photoWithProgress == self.photo) {
+    if (photoWithProgress == self.mediaItem) {
         float progress = [[dict valueForKey:@"progress"] floatValue];
         _loadingIndicator.progress = MAX(MIN(1, progress), 0);
     }
