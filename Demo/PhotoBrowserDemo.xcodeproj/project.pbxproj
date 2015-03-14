@@ -139,7 +139,6 @@
 		2C2B05391AB46943005A794E /* MWPhotoBrowser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MWPhotoBrowser.m; sourceTree = "<group>"; };
 		2C2B053A1AB46943005A794E /* MWPhotoBrowserPage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MWPhotoBrowserPage.h; sourceTree = "<group>"; };
 		2C2B053B1AB46943005A794E /* MWPhotoBrowserPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MWPhotoBrowserPrivate.h; sourceTree = "<group>"; };
-		2C2B053C1AB46943005A794E /* MWPhotoProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MWPhotoProtocol.h; sourceTree = "<group>"; };
 		2C2B053F1AB46943005A794E /* MWTapDetectingView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MWTapDetectingView.h; sourceTree = "<group>"; };
 		2C2B05401AB46943005A794E /* MWTapDetectingView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MWTapDetectingView.m; sourceTree = "<group>"; };
 		2C2B05411AB46943005A794E /* MWVideo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MWVideo.h; sourceTree = "<group>"; };
@@ -263,7 +262,6 @@
 				2C2B05391AB46943005A794E /* MWPhotoBrowser.m */,
 				2C2B053A1AB46943005A794E /* MWPhotoBrowserPage.h */,
 				2C2B053B1AB46943005A794E /* MWPhotoBrowserPrivate.h */,
-				2C2B053C1AB46943005A794E /* MWPhotoProtocol.h */,
 				2C2B053F1AB46943005A794E /* MWTapDetectingView.h */,
 				2C2B05401AB46943005A794E /* MWTapDetectingView.m */,
 				2C2B05431AB46943005A794E /* MWVideoPageView.h */,

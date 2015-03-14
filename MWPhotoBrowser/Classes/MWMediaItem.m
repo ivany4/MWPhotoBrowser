@@ -47,7 +47,7 @@
     return _underlyingImage;
 }
 
-- (void)loadUnderlyingImageAndNotify
+- (void)preloadContent
 {
     NSAssert([[NSThread currentThread] isMainThread], @"This method must be called on the main thread.");
     if (_loadingInProgress) return;
@@ -56,7 +56,7 @@
         if (self.underlyingImage) {
             [self imageLoadingComplete];
         } else {
-            [self performLoadUnderlyingImageAndNotify];
+            [self loadImageAndNotify];
         }
     }
     @catch (NSException *exception) {
@@ -69,7 +69,7 @@
 }
 
 // Set the underlyingImage
-- (void)performLoadUnderlyingImageAndNotify {
+- (void)loadImageAndNotify {
     
     // Get underlying image
     if (_image) {
@@ -171,18 +171,19 @@
     if ([self underlyingImage]) {
         return [self underlyingImage];
     } else {
-        [self loadUnderlyingImageAndNotify];
+        [self preloadContent];
     }
     return nil;
 }
 
 // Release if we can get it again from path or url
-- (void)unloadUnderlyingImage {
+- (void)unloadContent {
     _loadingInProgress = NO;
     self.underlyingImage = nil;
 }
 
-- (void)imageLoadingComplete {
+- (void)imageLoadingComplete
+{
     NSAssert([[NSThread currentThread] isMainThread], @"This method must be called on the main thread.");
     // Complete so notify
     _loadingInProgress = NO;

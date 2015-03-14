@@ -32,7 +32,6 @@
 // Paging
 - (void)tilePages;
 - (BOOL)isDisplayingPageForIndex:(NSUInteger)index;
-- (UIView<MWPhotoBrowserPage> *)pageDisplayedAtIndex:(NSUInteger)index;
 - (UIView<MWPhotoBrowserPage> *)pageDisplayingMediaItem:(MWMediaItem *)mediaItem;
 - (UIView<MWPhotoBrowserPage> *)dequeueRecycledPageForMediaItem:(MWMediaItem *)mediaItem;
 - (void)configurePage:(UIView<MWPhotoBrowserPage> *)page forIndex:(NSUInteger)index withMediaItem:(MWMediaItem *)mediaItem;
@@ -45,12 +44,6 @@
 - (CGPoint)contentOffsetForPageAtIndex:(NSUInteger)index;
 - (CGRect)frameForToolbarAtOrientation:(UIInterfaceOrientation)orientation;
 - (CGRect)frameForCaptionView:(MWCaptionView *)captionView atIndex:(NSUInteger)index;
-
-// Navigation
-- (void)updateNavigation;
-- (void)jumpToPageAtIndex:(NSUInteger)index animated:(BOOL)animated;
-- (void)gotoPreviousPage;
-- (void)gotoNextPage;
 
 // Controls
 - (void)cancelControlHiding;

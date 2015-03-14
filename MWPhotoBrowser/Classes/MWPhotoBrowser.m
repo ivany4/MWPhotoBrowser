@@ -144,7 +144,7 @@
             if (preserveCurrent && p == [self mediaItemAtIndex:self.currentIndex]) {
                 continue; // skip current
             }
-            [p unloadUnderlyingImage];
+            [p unloadContent];
         }
     }
 }
@@ -599,16 +599,16 @@
                 // Preload index - 1
                 MWMediaItem *mediaItem = [self mediaItemAtIndex:pageIndex-1];
                 if (![mediaItem underlyingImage]) {
-                    [mediaItem loadUnderlyingImageAndNotify];
-                    MWLog(@"Pre-loading image at index %lu", (unsigned long)pageIndex-1);
+                    [mediaItem preloadContent];
+                    MWLog(@"Pre-loading content at index %lu", (unsigned long)pageIndex-1);
                 }
             }
             if (pageIndex < [self numberOfMediaItems] - 1) {
                 // Preload index + 1
                 MWMediaItem *mediaItem = [self mediaItemAtIndex:pageIndex+1];
                 if (![mediaItem underlyingImage]) {
-                    [mediaItem loadUnderlyingImageAndNotify];
-                    MWLog(@"Pre-loading image at index %lu", (unsigned long)pageIndex+1);
+                    [mediaItem preloadContent];
+                    MWLog(@"Pre-loading content at index %lu", (unsigned long)pageIndex+1);
                 }
             }
         }
@@ -695,20 +695,11 @@
     
 }
 
-- (BOOL)isDisplayingPageForIndex:(NSUInteger)index {
+- (BOOL)isDisplayingPageForIndex:(NSUInteger)index
+{
     for (UIView<MWPhotoBrowserPage> *page in _visiblePages)
         if (page.index == index) return YES;
     return NO;
-}
-
-- (UIView<MWPhotoBrowserPage> *)pageDisplayedAtIndex:(NSUInteger)index {
-    UIView<MWPhotoBrowserPage> *thePage = nil;
-    for (UIView<MWPhotoBrowserPage> *page in _visiblePages) {
-        if (page.index == index) {
-            thePage = page; break;
-        }
-    }
-    return thePage;
 }
 
 - (UIView<MWPhotoBrowserPage> *)pageDisplayingMediaItem:(MWMediaItem *)mediaItem
@@ -753,7 +744,7 @@
         for (i = 0; i < index-1; i++) {
             MWMediaItem *mediaItem = [_mediaItems objectAtIndex:i];
             if (![mediaItem isEqual:[NSNull null]]) {
-                [mediaItem unloadUnderlyingImage];
+                [mediaItem unloadContent];
                 [_mediaItems replaceObjectAtIndex:i withObject:[NSNull null]];
                 MWLog(@"Released underlying image at index %lu", (unsigned long)i);
             }
@@ -764,7 +755,7 @@
         for (i = index + 2; i < _mediaItems.count; i++) {
             MWMediaItem *mediaItem = [_mediaItems objectAtIndex:i];
             if (![mediaItem isEqual:[NSNull null]]) {
-                [mediaItem unloadUnderlyingImage];
+                [mediaItem unloadContent];
                 [_mediaItems replaceObjectAtIndex:i withObject:[NSNull null]];
                 MWLog(@"Released underlying image at index %lu", (unsigned long)i);
             }
@@ -912,21 +903,6 @@
     // Update timer to give more time
     //	[self hideControlsAfterDelay];
     
-}
-
-- (void)gotoPreviousPage {
-    [self showPreviousMediaItemAnimated:NO];
-}
-- (void)gotoNextPage {
-    [self showNextMediaItemAnimated:NO];
-}
-
-- (void)showPreviousMediaItemAnimated:(BOOL)animated {
-    [self jumpToPageAtIndex:_currentPageIndex-1 animated:animated];
-}
-
-- (void)showNextMediaItemAnimated:(BOOL)animated {
-    [self jumpToPageAtIndex:_currentPageIndex+1 animated:animated];
 }
 
 #pragma mark - Control Hiding / Showing
@@ -1086,8 +1062,9 @@
     if (mediaItemCount == 0) {
         index = 0;
     } else {
-        if (index >= mediaItemCount)
+        if (index >= mediaItemCount) {
             index = [self numberOfMediaItems]-1;
+        }
     }
     _currentPageIndex = index;
     if ([self isViewLoaded]) {
