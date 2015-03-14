@@ -18,6 +18,8 @@
 @property (nonatomic, strong) UIImageView *loadingError;
 @property (nonatomic, strong) UIButton *playButton;
 @property (nonatomic, strong) MPMoviePlayerController *moviePlayer;
+@property (nonatomic, assign) CGSize videoSize;
+@property (nonatomic, assign) BOOL hasVideoSize;
 @end
 
 @implementation MWVideoPageView
@@ -92,6 +94,10 @@
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    
+    if (self.moviePlayer) {
+        [self.moviePlayer stop];
+    }
 }
 
 - (void)prepareForReuse
@@ -101,6 +107,7 @@
     self.captionView = nil;
     _photoImageView.image = nil;
     _index = NSUIntegerMax;
+    self.hasVideoSize = NO;
     if (self.moviePlayer) {
         [self.moviePlayer stop];
         [self.moviePlayer.view removeFromSuperview];
@@ -153,7 +160,7 @@
             // Set image
             _photoImageView.image = img;
             
-            [self updateImageFrame];
+            [self resizeView:_photoImageView toSize:img.size];
             
         } else {
             
@@ -165,18 +172,18 @@
     }
 }
 
-- (void)fitImageFrameInBounds:(CGRect)imageFrame
+- (CGRect)frameFittingInBounds:(CGRect)origFrame
 {
-    CGFloat hMargin = (self.bounds.size.width - imageFrame.size.width)/2.;
-    CGFloat vMargin = (self.bounds.size.height - imageFrame.size.height)/2.;
-    imageFrame.origin = CGPointMake(hMargin, vMargin);
-    _photoImageView.frame = CGRectIntegral(imageFrame);
+    CGFloat hMargin = (self.bounds.size.width - origFrame.size.width)/2.;
+    CGFloat vMargin = (self.bounds.size.height - origFrame.size.height)/2.;
+    origFrame.origin = CGPointMake(hMargin, vMargin);
+    return CGRectIntegral(origFrame);
 }
 
-- (void)updateImageFrame
+- (void)resizeView:(UIView *)view toSize:(CGSize)size
 {
     CGRect fullSizeRect = CGRectZero;
-    fullSizeRect.size = _photoImageView.image.size;
+    fullSizeRect.size = size;
     
     CGFloat hScale = self.bounds.size.width/fullSizeRect.size.width;
     CGFloat vScale = self.bounds.size.height/fullSizeRect.size.height;
@@ -184,14 +191,14 @@
     CGFloat scale = 1;
     
     if (hScale >= 1 && vScale >= 1) {
-        [self fitImageFrameInBounds:fullSizeRect];
+        view.frame = [self frameFittingInBounds:fullSizeRect];
     }
     else {
         scale = MIN(hScale, vScale);
         CGRect newFrame = fullSizeRect;
         newFrame.size.width *= scale;
         newFrame.size.height *= scale;
-        [self fitImageFrameInBounds:newFrame];
+        view.frame = [self frameFittingInBounds:newFrame];
     }
 }
 
@@ -259,14 +266,24 @@
                                          _loadingError.frame.size.width,
                                          _loadingError.frame.size.height);
     
-    
-    [self updateImageFrame];
+    [self resizeView:_photoImageView toSize:_photoImageView.image.size];
+
     if (self.moviePlayer) {
-        self.moviePlayer.view.frame = _photoImageView.frame;
+        [self layoutVideoFrame];
     }
     
     // Super
     [super layoutSubviews];
+}
+
+- (void)layoutVideoFrame
+{
+    if (self.hasVideoSize) {
+        [self resizeView:self.moviePlayer.view toSize:self.videoSize];
+    }
+    else {
+        self.moviePlayer.view.frame = _photoImageView.frame;
+    }
 }
 
 
@@ -279,23 +296,15 @@
     self.moviePlayer = [[MPMoviePlayerController alloc]
                         initWithContentURL:url];
     
-//    //Because UIScrollView conflicts with this
-//    for (UIView *view in self.moviePlayer.view.subviews) {
-//        for (UIPinchGestureRecognizer *pinch in view.gestureRecognizers) {
-//            if([pinch isKindOfClass:[UIPinchGestureRecognizer class]]) {
-//                [view removeGestureRecognizer:pinch];
-//                break;
-//            }
-//        }
-//    }
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(moviePlayBackDidFinish:) name:MPMoviePlayerPlaybackDidFinishNotification object:self.moviePlayer];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(movieNaturalSizeAvailable:) name:MPMovieNaturalSizeAvailableNotification object:self.moviePlayer];
     
     self.moviePlayer.controlStyle = MPMovieControlStyleEmbedded;
     self.moviePlayer.shouldAutoplay = YES;
     self.moviePlayer.view.translatesAutoresizingMaskIntoConstraints = YES;
     [self insertSubview:self.moviePlayer.view aboveSubview:self.playButton];
-    self.moviePlayer.view.frame = _photoImageView.frame;
+    [self layoutVideoFrame];
 //    [self.moviePlayer setFullscreen:YES animated:YES];
     [self.moviePlayer prepareToPlay];
     [self.moviePlayer play];
@@ -305,8 +314,28 @@
 {
     MPMoviePlayerController *player = [notification object];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:MPMoviePlayerPlaybackDidFinishNotification object:player];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:MPMovieNaturalSizeAvailableNotification object:player];
     [player.view removeFromSuperview];
     self.moviePlayer = nil;
+    self.hasVideoSize = NO;
+}
+
+- (void)movieNaturalSizeAvailable:(NSNotification*)notification
+{
+    MPMoviePlayerController *player = [notification object];
+    self.videoSize = player.naturalSize;
+    self.hasVideoSize = YES;
+    [self layoutVideoFrame];
+}
+
+- (void)attachGestureRecognizer
+{
+    
+}
+
+- (void)detachGestureRecognizer
+{
+    
 }
 
 #pragma mark - Tap handling
