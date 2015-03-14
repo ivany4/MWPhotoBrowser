@@ -34,6 +34,7 @@
     UIActionSheet *_actionsSheet;
         
     // Appearance
+    BOOL _controlsHidden;
     BOOL _previousNavBarHidden;
     BOOL _previousNavBarTranslucent;
     UIBarStyle _previousNavBarStyle;
@@ -75,10 +76,10 @@
 // Paging
 - (void)tilePages;
 - (BOOL)isDisplayingPageForIndex:(NSUInteger)index;
-- (MWZoomingScrollView *)pageDisplayedAtIndex:(NSUInteger)index;
-- (MWZoomingScrollView *)pageDisplayingMediaItem:(MWMediaItem *)mediaItem;
-- (MWZoomingScrollView *)dequeueRecycledPage;
-- (void)configurePage:(MWZoomingScrollView *)page forIndex:(NSUInteger)index;
+- (UIView<MWPhotoBrowserPage> *)pageDisplayedAtIndex:(NSUInteger)index;
+- (UIView<MWPhotoBrowserPage> *)pageDisplayingMediaItem:(MWMediaItem *)mediaItem;
+- (UIView<MWPhotoBrowserPage> *)dequeueRecycledPage;
+- (void)configurePage:(UIView<MWPhotoBrowserPage> *)page forIndex:(NSUInteger)index;
 - (void)didStartViewingPageAtIndex:(NSUInteger)index;
 
 // Frames

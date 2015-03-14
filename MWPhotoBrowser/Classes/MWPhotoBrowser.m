@@ -389,21 +389,18 @@
     _pagingScrollView.contentSize = [self contentSizeForPagingScrollView];
     
     // Adjust frames and configuration of each visible page
-    for (MWZoomingScrollView *page in _visiblePages) {
+    for (UIView<MWPhotoBrowserPage> *page in _visiblePages) {
         NSUInteger index = page.index;
         page.frame = [self frameForPageAtIndex:index];
         if (page.captionView) {
             page.captionView.frame = [self frameForCaptionView:page.captionView atIndex:index];
         }
-        if (page.auxilaryView) {
-            page.auxilaryView.frame = page.bounds;
-            //            page.auxilaryView.center = page.center;
-        }
+        [page layoutIfNeeded];
         
         // Adjust scales if bounds has changed since last time
         if (!CGRectEqualToRect(_previousLayoutBounds, self.view.bounds)) {
             // Update zooms for new bounds
-            [page setMaxMinZoomScalesForCurrentBounds];
+            [page updateLayoutForCurrentBounds];
             _previousLayoutBounds = self.view.bounds;
         }
         
@@ -554,7 +551,7 @@
 }
 
 - (void)loadAdjacentMediaItemsIfNecessary:(MWMediaItem *)mediaItem {
-    MWZoomingScrollView *page = [self pageDisplayingMediaItem:mediaItem];
+    UIView<MWPhotoBrowserPage> *page = [self pageDisplayingMediaItem:mediaItem];
     if (page) {
         // If page is current page then initiate loading of previous and next pages
         NSUInteger pageIndex = page.index;
@@ -583,15 +580,15 @@
 
 - (void)handleMWPhotoLoadingDidEndNotification:(NSNotification *)notification {
     MWMediaItem *mediaItem = [notification object];
-    MWZoomingScrollView *page = [self pageDisplayingMediaItem:mediaItem];
+    UIView<MWPhotoBrowserPage> *page = [self pageDisplayingMediaItem:mediaItem];
     if (page) {
         if ([mediaItem underlyingImage]) {
             // Successful load
-            [page displayImage];
+            [page displayContent];
             [self loadAdjacentMediaItemsIfNecessary:mediaItem];
         } else {
             // Failed to load
-            [page displayImageFailure];
+            [page displayContentFailure];
         }
         // Update nav
         [self updateNavigation];
@@ -615,7 +612,7 @@
     
     // Recycle no longer needed pages
     NSInteger pageIndex;
-    for (MWZoomingScrollView *page in _visiblePages) {
+    for (UIView<MWPhotoBrowserPage> *page in _visiblePages) {
         pageIndex = page.index;
         if (pageIndex < (NSUInteger)iFirstIndex || pageIndex > (NSUInteger)iLastIndex) {
             [_recycledPages addObject:page];
@@ -634,7 +631,7 @@
         if (![self isDisplayingPageForIndex:index]) {
             
             // Add new page
-            MWZoomingScrollView *page = [self dequeueRecycledPage];
+            UIView<MWPhotoBrowserPage> *page = [self dequeueRecycledPage];
             if (!page) {
                 page = [[MWZoomingScrollView alloc] initWithBrowser:self];
             }
@@ -658,14 +655,14 @@
 }
 
 - (BOOL)isDisplayingPageForIndex:(NSUInteger)index {
-    for (MWZoomingScrollView *page in _visiblePages)
+    for (UIView<MWPhotoBrowserPage> *page in _visiblePages)
         if (page.index == index) return YES;
     return NO;
 }
 
-- (MWZoomingScrollView *)pageDisplayedAtIndex:(NSUInteger)index {
-    MWZoomingScrollView *thePage = nil;
-    for (MWZoomingScrollView *page in _visiblePages) {
+- (UIView<MWPhotoBrowserPage> *)pageDisplayedAtIndex:(NSUInteger)index {
+    UIView<MWPhotoBrowserPage> *thePage = nil;
+    for (UIView<MWPhotoBrowserPage> *page in _visiblePages) {
         if (page.index == index) {
             thePage = page; break;
         }
@@ -673,10 +670,10 @@
     return thePage;
 }
 
-- (MWZoomingScrollView *)pageDisplayingMediaItem:(MWMediaItem *)mediaItem
+- (UIView<MWPhotoBrowserPage> *)pageDisplayingMediaItem:(MWMediaItem *)mediaItem
 {
-    MWZoomingScrollView *thePage = nil;
-    for (MWZoomingScrollView *page in _visiblePages) {
+    UIView<MWPhotoBrowserPage> *thePage = nil;
+    for (UIView<MWPhotoBrowserPage> *page in _visiblePages) {
         if ([page.mediaItem isEqual:mediaItem]) {
             thePage = page; break;
         }
@@ -684,14 +681,14 @@
     return thePage;
 }
 
-- (void)configurePage:(MWZoomingScrollView *)page forIndex:(NSUInteger)index {
+- (void)configurePage:(UIView<MWPhotoBrowserPage> *)page forIndex:(NSUInteger)index {
     page.frame = [self frameForPageAtIndex:index];
     page.index = index;
     page.mediaItem = [self mediaItemAtIndex:index];
 }
 
-- (MWZoomingScrollView *)dequeueRecycledPage {
-    MWZoomingScrollView *page = [_recycledPages anyObject];
+- (UIView<MWPhotoBrowserPage> *)dequeueRecycledPage {
+    UIView<MWPhotoBrowserPage> *page = [_recycledPages anyObject];
     if (page) {
         [_recycledPages removeObject:page];
     }
@@ -741,7 +738,7 @@
     }
     
     if ([currentMediaItem respondsToSelector:@selector(mediaItemDidAriveToView:)]) {
-        for (MWZoomingScrollView *page in _visiblePages) {
+        for (UIView<MWPhotoBrowserPage> *page in _visiblePages) {
             if (page.index == self.currentIndex) {
                 [currentMediaItem mediaItemDidAriveToView:page];
                 break;
@@ -971,7 +968,7 @@
     if (slideAndFade && [self areControlsHidden] && !hidden && animated) {
         
         // Captions
-        for (MWZoomingScrollView *page in _visiblePages) {
+        for (UIView<MWPhotoBrowserPage> *page in _visiblePages) {
             if (page.captionView) {
                 MWCaptionView *v = page.captionView;
                 // Pass any index, all we're interested in is the Y
@@ -989,8 +986,10 @@
         // Nav bar slides up on it's own on iOS 7
         [self.navigationController.navigationBar setAlpha:alpha];
         
+        _controlsHidden = hidden;
+        
         // Captions
-        for (MWZoomingScrollView *page in _visiblePages) {
+        for (UIView<MWPhotoBrowserPage> *page in _visiblePages) {
             if (page.captionView) {
                 MWCaptionView *v = page.captionView;
                 if (slideAndFade) {
@@ -1041,7 +1040,7 @@
     }
 }
 
-- (BOOL)areControlsHidden { return (self.navigationController.navigationBar.alpha == 0); }
+- (BOOL)areControlsHidden { return _controlsHidden; }
 - (void)hideControls { [self setControlsHidden:YES animated:YES permanent:NO]; }
 - (void)toggleControls { [self setControlsHidden:![self areControlsHidden] animated:YES permanent:NO]; }
 

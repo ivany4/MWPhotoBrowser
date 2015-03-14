@@ -16,4 +16,7 @@
 @property NSUInteger index;
 - (id)initWithBrowser:(MWPhotoBrowser *)browser;
 - (void)prepareForReuse;
+- (void)updateLayoutForCurrentBounds;
+- (void)displayContent;
+- (void)displayContentFailure;
 @end

@@ -15,10 +15,4 @@
 @interface MWZoomingScrollView : UIScrollView <UIScrollViewDelegate, MWTapDetectingViewDelegate, MWPhotoBrowserPage> {
 
 }
-@property (nonatomic, strong) UIView *auxilaryView;
-
-- (void)displayImage;
-- (void)displayImageFailure;
-- (void)setMaxMinZoomScalesForCurrentBounds;
-
 @end

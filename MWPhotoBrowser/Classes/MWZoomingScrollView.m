@@ -23,6 +23,7 @@
     UIImageView *_loadingError;    
 }
 
+@property (nonatomic, strong) UIView *auxilaryView;
 @end
 
 @implementation MWZoomingScrollView
@@ -109,7 +110,7 @@
     _mediaItem = mediaItem;
     UIImage *img = [_photoBrowser imageForMediaItem:_mediaItem];
     if (img) {
-        [self displayImage];
+        [self displayContent];
     } else {
         // Will be loading so show loading
         [self showLoadingIndicator];
@@ -117,7 +118,7 @@
 }
 
 // Get and display image
-- (void)displayImage {
+- (void)displayContent {
 	if (_mediaItem && _photoImageView.image == nil) {
 		
 		// Reset
@@ -159,7 +160,7 @@
 		} else {
 			
 			// Failed no image
-            [self displayImageFailure];
+            [self displayContentFailure];
 			
 		}
 		[self setNeedsLayout];
@@ -167,7 +168,7 @@
 }
 
 // Image failed so just show black!
-- (void)displayImageFailure {
+- (void)displayContentFailure {
     [self hideLoadingIndicator];
     _photoImageView.image = nil;
     if (!_loadingError) {
@@ -190,6 +191,11 @@
         [_loadingError removeFromSuperview];
         _loadingError = nil;
     }
+}
+
+- (void)updateLayoutForCurrentBounds
+{
+    [self setMaxMinZoomScalesForCurrentBounds];
 }
 
 #pragma mark - Loading Progress
@@ -336,6 +342,11 @@
 	// Center
 	if (!CGRectEqualToRect(_photoImageView.frame, frameToCenter))
 		_photoImageView.frame = frameToCenter;
+    
+    
+    if (_auxilaryView) {
+        _auxilaryView.frame = self.bounds;
+    }
 	
 }
 
