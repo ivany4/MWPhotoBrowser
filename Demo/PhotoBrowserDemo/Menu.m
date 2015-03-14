@@ -173,10 +173,10 @@
             photo.caption = @"The London Eye is a giant Ferris wheel situated on the banks of the River Thames, in London, England.";
             [photos addObject:photo];
             MWVideo *video = [MWVideo mediaItemWithURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"photo3" ofType:@"jpg"]]];
-            video.caption = @"York Floods";
+//            video.caption = @"York Floods";
             [photos addObject:video];
             photo = [MWPhoto photoWithImage:[UIImage imageWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"photo4" ofType:@"jpg"]]];
-            photo.caption = @"Campervan";
+//            photo.caption = @"Campervan";
             [photos addObject:photo];
             break;
         }

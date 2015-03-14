@@ -48,12 +48,16 @@ static const CGFloat labelPadding = 10;
                                       attributes:@{NSFontAttributeName:_label.font}
                                          context:nil].size;
 
+    if (textSize.height > 0) {
+        textSize.height += labelPadding*2;
+    }
+    
     CGFloat additionalHeight = 0;
     if (self.customControls) {
         additionalHeight = self.customControls.frame.size.height + 5;
     }
     
-    return CGSizeMake(size.width, textSize.height + labelPadding * 2 + additionalHeight);
+    return CGSizeMake(size.width, textSize.height + additionalHeight);
 }
 
 - (void)setupCaption {
@@ -66,9 +70,7 @@ static const CGFloat labelPadding = 10;
     _label.numberOfLines = 0;
     _label.textColor = [UIColor whiteColor];
     _label.font = [UIFont systemFontOfSize:17];
-    if ([_mediaItem respondsToSelector:@selector(caption)]) {
-        _label.text = [_mediaItem caption] ?: @" ";
-    }
+    _label.text = [_mediaItem caption];
     [self addSubview:_label];
     [self layoutCaption];
 }

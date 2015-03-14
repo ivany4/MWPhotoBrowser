@@ -584,9 +584,7 @@
         captionView = [_delegate browser:self captionViewForMediaItemAtIndex:index];
     } else {
         MWMediaItem *mediaItem = [self mediaItemAtIndex:index];
-        if ([mediaItem respondsToSelector:@selector(caption)]) {
-            if ([mediaItem caption]) captionView = [[MWCaptionView alloc] initWithMediaItem:mediaItem];
-        }
+        captionView = [[MWCaptionView alloc] initWithMediaItem:mediaItem];
     }
     captionView.alpha = [self areControlsHidden] ? 0 : 1; // Initial alpha
     return captionView;
