@@ -18,6 +18,7 @@
 @property (nonatomic, strong) UIImageView *loadingError;
 @property (nonatomic, strong) UIButton *playButton;
 @property (nonatomic, strong) MPMoviePlayerController *moviePlayer;
+@property (nonatomic, strong) UITapGestureRecognizer *movieTap;
 @property (nonatomic, assign) CGSize videoSize;
 @property (nonatomic, assign) BOOL hasVideoSize;
 @end
@@ -108,6 +109,7 @@
     _photoImageView.image = nil;
     _index = NSUIntegerMax;
     self.hasVideoSize = NO;
+    self.movieTap = nil;
     if (self.moviePlayer) {
         [self.moviePlayer stop];
         [self.moviePlayer.view removeFromSuperview];
@@ -299,13 +301,15 @@
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(moviePlayBackDidFinish:) name:MPMoviePlayerPlaybackDidFinishNotification object:self.moviePlayer];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(movieNaturalSizeAvailable:) name:MPMovieNaturalSizeAvailableNotification object:self.moviePlayer];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(detachGestureRecognizer) name:MPMoviePlayerWillEnterFullscreenNotification object:self.moviePlayer];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(attachGestureRecognizer) name:MPMoviePlayerDidExitFullscreenNotification object:self.moviePlayer];
     
     self.moviePlayer.controlStyle = MPMovieControlStyleEmbedded;
     self.moviePlayer.shouldAutoplay = YES;
     self.moviePlayer.view.translatesAutoresizingMaskIntoConstraints = YES;
     [self insertSubview:self.moviePlayer.view aboveSubview:self.playButton];
     [self layoutVideoFrame];
-//    [self.moviePlayer setFullscreen:YES animated:YES];
+    [self attachGestureRecognizer];
     [self.moviePlayer prepareToPlay];
     [self.moviePlayer play];
 }
@@ -330,18 +334,33 @@
 
 - (void)attachGestureRecognizer
 {
-    
+    if (!self.movieTap) {
+        self.movieTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(movieTapped:)];
+        self.movieTap.numberOfTapsRequired = 1;
+    }
+    [self.moviePlayer.view addGestureRecognizer:self.movieTap];
 }
 
 - (void)detachGestureRecognizer
 {
-    
+    [self.moviePlayer.view removeGestureRecognizer:self.movieTap];
 }
 
 #pragma mark - Tap handling
 
+- (void)movieTapped:(UITapGestureRecognizer *)recognizer
+{
+    if (recognizer.state == UIGestureRecognizerStateEnded) {
+        [self handleTap];
+    }
+}
 
 - (void)view:(UIView *)view singleTapDetected:(UITouch *)touch
+{
+    [self handleTap];
+}
+
+- (void)handleTap
 {
     [_photoBrowser performSelector:@selector(toggleControls) withObject:nil afterDelay:0.2];
 }
