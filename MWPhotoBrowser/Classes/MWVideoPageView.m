@@ -11,41 +11,55 @@
 #import "MWPhotoBrowserPrivate.h"
 #import <MediaPlayer/MediaPlayer.h>
 
-@interface MWControlsView : UIView
+@interface MWControlsView : UIControl
 @property (nonatomic, strong) UILabel *beforeLabel;
 @property (nonatomic, strong) UILabel *afterLabel;
+@property (nonatomic, strong) UIButton *playbackButton;
+@property (nonatomic, strong) UISlider *seekSlider;
+@property (nonatomic, strong) NSTimer *seekUpdateTimer;
+@property (nonatomic, weak) MPMoviePlayerController *player;
+
+- (instancetype)initWithPlayer:(MPMoviePlayerController *)player;
+- (instancetype)initWithFrame:(CGRect)frame player:(MPMoviePlayerController *)player NS_DESIGNATED_INITIALIZER;
 @end
 
 @implementation MWControlsView
 
-- (instancetype)init
+- (instancetype)initWithPlayer:(MPMoviePlayerController *)player
 {
-    return [self initWithFrame:CGRectMake(0, 0, [UIApplication sharedApplication].keyWindow.frame.size.width, 44)];
+    return [self initWithFrame:CGRectMake(0, 0, [UIApplication sharedApplication].keyWindow.frame.size.width, 50) player:player];
 }
 
-- (instancetype)initWithFrame:(CGRect)frame
+- (instancetype)initWithFrame:(CGRect)frame player:(MPMoviePlayerController *)player
 {
     if (self = [super initWithFrame:frame]) {
-        [self setup];
+        [self setupWithPlayer:player];
     }
     return self;
 }
 
-- (id)initWithCoder:(NSCoder *)aDecoder
+- (void)dealloc
 {
-    if (self = [super initWithCoder:aDecoder]) {
-        [self setup];
-    }
-    return self;
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [self.seekUpdateTimer invalidate];
 }
 
-- (void)setup
+- (void)setupWithPlayer:(MPMoviePlayerController *)player
 {
+    
+    self.player = player;
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playbackStateChanged:) name:MPMoviePlayerPlaybackStateDidChangeNotification object:player];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateDuration) name:MPMovieDurationAvailableNotification object:player];
+    
     UIButton *playButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [playButton setTitle:@"PL" forState:UIControlStateNormal];
+    playButton.tintColor = [UIColor whiteColor];
+    [playButton setImage:[[UIImage imageNamed:@"play"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate] forState:UIControlStateNormal];
     [playButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     playButton.translatesAutoresizingMaskIntoConstraints = NO;
+    [playButton addTarget:self action:@selector(togglePlayback:) forControlEvents:UIControlEventTouchUpInside];
     [self addSubview:playButton];
+    self.playbackButton = playButton;
     
     UILabel *beforeLabel = [[UILabel alloc] init];
     beforeLabel.backgroundColor = [UIColor clearColor];
@@ -53,24 +67,122 @@
     beforeLabel.translatesAutoresizingMaskIntoConstraints = NO;
     beforeLabel.text = @"00:00";
     [self addSubview:beforeLabel];
+    self.beforeLabel = beforeLabel;
+    
+    UISlider *slider = [[UISlider alloc] init];
+    slider.minimumValue = 0;
+    slider.maximumValue = 1;
+    slider.value = 0;
+    slider.continuous = YES;
+    slider.translatesAutoresizingMaskIntoConstraints = NO;
+    [slider addTarget:self action:@selector(updateSeek:) forControlEvents:UIControlEventValueChanged];
+    [self addSubview:slider];
+    self.seekSlider = slider;
+    
+    UILabel *afterLabel = [[UILabel alloc] init];
+    afterLabel.backgroundColor = [UIColor clearColor];
+    afterLabel.textColor = [UIColor whiteColor];
+    afterLabel.translatesAutoresizingMaskIntoConstraints = NO;
+    afterLabel.text = @"00:00";
+    [self addSubview:afterLabel];
+    self.afterLabel = afterLabel;
     
     UIButton *fullscreenButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    fullscreenButton.frame = CGRectMake(320-100-10, 0, 100, 44);
-    [fullscreenButton setTitle:@"FS" forState:UIControlStateNormal];
-    [fullscreenButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    fullscreenButton.tintColor = [UIColor whiteColor];
+    [fullscreenButton setImage:[[UIImage imageNamed:@"fullscreen"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate] forState:UIControlStateNormal];
     fullscreenButton.translatesAutoresizingMaskIntoConstraints = NO;
+    [fullscreenButton addTarget:self action:@selector(fullscreen:) forControlEvents:UIControlEventTouchUpInside];
     [self addSubview:fullscreenButton];
     
-    NSDictionary *views = NSDictionaryOfVariableBindings(playButton, beforeLabel, fullscreenButton);
-    [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-10-[playButton]-10-[beforeLabel]->=10-[fullscreenButton]-10-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
+    NSDictionary *views = NSDictionaryOfVariableBindings(playButton, beforeLabel, fullscreenButton, afterLabel, slider);
     
     for (UIView *view in self.subviews) {
         [self addConstraint:[NSLayoutConstraint constraintWithItem:view attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
+        if (![view isEqual:slider]) {
+            [view setContentCompressionResistancePriority:UILayoutPriorityRequired forAxis:UILayoutConstraintAxisHorizontal];
+        }
+        else {
+            [view setContentCompressionResistancePriority:UILayoutPriorityDefaultLow forAxis:UILayoutConstraintAxisHorizontal];
+        }
     }
     
-    self.backgroundColor = [UIColor darkGrayColor];
+    [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-10-[playButton]-10-[beforeLabel]-10-[slider]-10-[afterLabel]-10-[fullscreenButton]-10-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
+    
+    
+    [self updateDuration];
+    [self updateToggleButton];
     
     [self layoutIfNeeded];
+}
+
+
+- (void)updateSeek:(UISlider *)slider
+{
+    CGFloat frac = slider.value;
+    NSTimeInterval time = (self.player.duration-1)*frac;
+    self.player.currentPlaybackTime = time;
+    [self updateSeekWithSlider:NO];
+}
+
+- (void)updateSeek
+{
+    [self updateSeekWithSlider:YES];
+}
+
+- (void)togglePlayback:(id)sender
+{
+    if (self.player.playbackState == MPMoviePlaybackStatePaused) {
+        [self.player play];
+    }
+    else {
+        [self.player pause];
+    }
+    [self updateToggleButton];
+}
+
+- (void)fullscreen:(id)sender
+{
+    [self.player setFullscreen:YES animated:YES];
+}
+
+- (void)updateToggleButton
+{
+    NSString *name = self.player.playbackState == MPMoviePlaybackStatePaused ? @"play" : @"pause";
+    [self.playbackButton setImage:[[UIImage imageNamed:name] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate] forState:UIControlStateNormal];
+}
+
+- (void)updateDuration
+{
+    [self updateSeekWithSlider:YES];
+}
+
+- (void)updateSeekWithSlider:(BOOL)withSlider
+{
+    self.beforeLabel.text = [self formatPlaybackTime:ceil(self.player.currentPlaybackTime)];
+    self.afterLabel.text = [self formatPlaybackTime:floor(self.player.duration-self.player.currentPlaybackTime)];
+    if (withSlider) {
+        CGFloat frac = self.player.duration > 1 ? (self.player.currentPlaybackTime/(self.player.duration-1)) : 0;
+        [self.seekSlider setValue:frac animated:NO];
+    }
+}
+
+- (NSString *)formatPlaybackTime:(NSTimeInterval)time
+{
+    if (isnan(time) || isinf(time)) time = 0;
+    return [NSString stringWithFormat:@"%02.0f:%02d", time/60., (int)time % 60];
+}
+
+- (void)playbackStateChanged:(NSNotification *)note
+{
+    [self updateToggleButton];
+    if (self.player.playbackState == MPMoviePlaybackStatePlaying) {
+        if (!self.seekUpdateTimer) {
+            self.seekUpdateTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(updateSeek) userInfo:nil repeats:YES];
+        }
+    }
+    else {
+        [self.seekUpdateTimer invalidate], self.seekUpdateTimer = nil;
+    }
 }
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
@@ -129,8 +241,8 @@
         _playButton = [UIButton buttonWithType:UIButtonTypeCustom];
         _playButton.frame = CGRectMake(0, 0, 150, 150);
         _playButton.tintColor = [UIColor colorWithWhite:1 alpha:0.5];
-        [_playButton setImage:[[UIImage imageNamed:@"play"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate] forState:UIControlStateNormal];
-        [_playButton setImage:[UIImage imageNamed:@"play"] forState:UIControlStateHighlighted];
+        [_playButton setImage:[[UIImage imageNamed:@"play_big"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate] forState:UIControlStateNormal];
+        [_playButton setImage:[UIImage imageNamed:@"play_big"] forState:UIControlStateHighlighted];
         _playButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin|UIViewAutoresizingFlexibleRightMargin|UIViewAutoresizingFlexibleTopMargin|UIViewAutoresizingFlexibleBottomMargin;
         [_playButton addTarget:self action:@selector(playVideo:) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:_playButton];
@@ -417,7 +529,7 @@
     [self.moviePlayer prepareToPlay];
     [self.moviePlayer play];
     
-    [self.captionView accommodateCustomControls:[[MWControlsView alloc] init]];
+    [self.captionView accommodateCustomControls:[[MWControlsView alloc] initWithPlayer:self.moviePlayer]];
     self.captionView.frame = [_photoBrowser frameForCaptionView:self.captionView atIndex:self.index];
     [self.captionView setNeedsLayout];
 }
@@ -487,26 +599,6 @@
 - (UIView *)fullscreenGestureContainer
 {
     return [[[[UIApplication sharedApplication] windows] lastObject] subviews][0];
-}
-
-- (void)togglePlayback:(id)sender
-{
-    if (self.moviePlayer.playbackState == MPMoviePlaybackStatePaused) {
-        [self.moviePlayer play];
-    }
-    else {
-        [self.moviePlayer pause];
-    }
-}
-
-- (void)toggleFullscreen:(id)sender
-{
-    [self.moviePlayer setFullscreen:YES animated:YES];
-}
-
-- (void)seekTo:(NSTimeInterval)time
-{
-    [self.moviePlayer setCurrentPlaybackTime:time];
 }
 
 #pragma mark - Tap handling
