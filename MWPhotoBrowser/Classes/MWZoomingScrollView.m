@@ -20,8 +20,7 @@
 	MWTapDetectingView *_tapView; // for background taps
 	MWTapDetectingImageView *_photoImageView;
 	DACircularProgressView *_loadingIndicator;
-    UIImageView *_loadingError;
-    
+    UIImageView *_loadingError;    
 }
 
 @end
@@ -92,7 +91,9 @@
     self.selectedButton = nil;
     _photoImageView.image = nil;
     _index = NSUIntegerMax;
+    [_auxilaryView removeFromSuperview], _auxilaryView = nil;
 }
+
 
 #pragma mark - Image
 
@@ -143,6 +144,15 @@
 
 			// Set zoom to minimum zoom
 			[self setMaxMinZoomScalesForCurrentBounds];
+            
+            if ([_mediaItem respondsToSelector:@selector(overlayView)]) {
+                UIView *overlay = [_mediaItem overlayView];
+                overlay.frame = _photoImageView.frame;
+                overlay.autoresizingMask = UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
+                overlay.translatesAutoresizingMaskIntoConstraints = YES;
+                [[_photoImageView superview] insertSubview:overlay aboveSubview:_photoImageView];
+                _auxilaryView = overlay;
+            }
 			
 		} else {
 			

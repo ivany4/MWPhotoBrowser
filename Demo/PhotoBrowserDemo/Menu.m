@@ -10,6 +10,7 @@
 #import "SDImageCache.h"
 #import "MWCommon.h"
 #import "MWPhoto.h"
+#import "MWVideo.h"
 
 @implementation Menu
 
@@ -85,7 +86,7 @@
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    NSInteger rows = 2;
+    NSInteger rows = 3;
     @synchronized(_assets) {
         if (_assets.count) rows++;
     }
@@ -109,12 +110,17 @@
             cell.detailTextLabel.text = @"with caption, no grid button";
             break;
         }
-		case 1: {
+        case 1: {
             cell.textLabel.text = @"Multiple photos";
             cell.detailTextLabel.text = @"with captions";
             break;
         }
-		case 2: {
+        case 2: {
+            cell.textLabel.text = @"Multiple photos with videos";
+            cell.detailTextLabel.text = @"with captions";
+            break;
+        }
+		case 3: {
             cell.textLabel.text = @"Library photos";
             cell.detailTextLabel.text = @"photos from device library";
             break;
@@ -142,24 +148,40 @@
             photo = [MWPhoto mediaItemWithURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"photo2" ofType:@"jpg"]]];
             photo.caption = @"The London Eye is a giant Ferris wheel situated on the banks of the River Thames, in London, England.";
 			[photos addObject:photo];
-			break;
-		case 1: {
+            break;
+        case 1: {
             // Photos
             photo = [MWPhoto photoWithImage:[UIImage imageWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"photo5" ofType:@"jpg"]]];
             photo.caption = @"Fireworks";
-			[photos addObject:photo];
+            [photos addObject:photo];
             photo = [MWPhoto mediaItemWithURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"photo2" ofType:@"jpg"]]];
             photo.caption = @"The London Eye is a giant Ferris wheel situated on the banks of the River Thames, in London, England.";
-			[photos addObject:photo];
+            [photos addObject:photo];
             photo = [MWPhoto mediaItemWithURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"photo3" ofType:@"jpg"]]];
             photo.caption = @"York Floods";
-			[photos addObject:photo];
+            [photos addObject:photo];
             photo = [MWPhoto photoWithImage:[UIImage imageWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"photo4" ofType:@"jpg"]]];
             photo.caption = @"Campervan";
-			[photos addObject:photo];
-			break;
+            [photos addObject:photo];
+            break;
         }
-		case 2: {
+        case 2: {
+            // Photos
+            photo = [MWPhoto photoWithImage:[UIImage imageWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"photo5" ofType:@"jpg"]]];
+            photo.caption = @"Fireworks";
+            [photos addObject:photo];
+            photo = [MWPhoto mediaItemWithURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"photo2" ofType:@"jpg"]]];
+            photo.caption = @"The London Eye is a giant Ferris wheel situated on the banks of the River Thames, in London, England.";
+            [photos addObject:photo];
+            MWVideo *video = [MWVideo mediaItemWithURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"photo3" ofType:@"jpg"]]];
+            video.caption = @"York Floods";
+            [photos addObject:video];
+            photo = [MWPhoto photoWithImage:[UIImage imageWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"photo4" ofType:@"jpg"]]];
+            photo.caption = @"Campervan";
+            [photos addObject:photo];
+            break;
+        }
+		case 3: {
             @synchronized(_assets) {
                 NSMutableArray *copy = [_assets copy];
                 for (ALAsset *asset in copy) {

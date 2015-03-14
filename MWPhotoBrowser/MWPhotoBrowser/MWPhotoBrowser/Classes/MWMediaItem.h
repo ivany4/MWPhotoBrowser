@@ -8,11 +8,18 @@
 
 #import <Foundation/Foundation.h>
 
+@protocol MWMediaItem <NSObject>
+@optional
+- (void)mediaItemStartedDragging;   //To stop video playback e.g.
+- (UIView *)overlayView;
+- (void)mediaItemDidAriveToView:(UIView *)view;
+
+@end
 
 #define MWPHOTO_LOADING_DID_END_NOTIFICATION @"MWPHOTO_LOADING_DID_END_NOTIFICATION"
 #define MWPHOTO_PROGRESS_NOTIFICATION @"MWPHOTO_PROGRESS_NOTIFICATION"
 
-@interface MWMediaItem : NSObject
+@interface MWMediaItem : NSObject <MWMediaItem>
 @property (nonatomic, strong) NSString *caption;
 @property (nonatomic, readonly) NSURL *URL;
 @property (nonatomic, assign) BOOL isVideo;

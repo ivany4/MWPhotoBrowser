@@ -66,6 +66,9 @@
 		4C6F96F614AF710800F8389A /* MBProgressHUD.h in Headers */ = {isa = PBXBuildFile; fileRef = 4C6F96F414AF710800F8389A /* MBProgressHUD.h */; };
 		4C6F96F714AF710800F8389A /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C6F96F514AF710800F8389A /* MBProgressHUD.m */; };
 		4C6F97C714AF74E200F8389A /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C6F97C614AF74E200F8389A /* MessageUI.framework */; };
+		91A32A801AB4394F009BFA90 /* MWVideo.h in Headers */ = {isa = PBXBuildFile; fileRef = 91A32A7E1AB4394F009BFA90 /* MWVideo.h */; };
+		91A32A811AB4394F009BFA90 /* MWVideo.m in Sources */ = {isa = PBXBuildFile; fileRef = 91A32A7F1AB4394F009BFA90 /* MWVideo.m */; };
+		91A32A851AB43F0A009BFA90 /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 91A32A841AB43F0A009BFA90 /* MediaPlayer.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -131,6 +134,9 @@
 		4C6F96F414AF710800F8389A /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MBProgressHUD.h; path = Libraries/MBProgressHUD/MBProgressHUD.h; sourceTree = SOURCE_ROOT; };
 		4C6F96F514AF710800F8389A /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MBProgressHUD.m; path = Libraries/MBProgressHUD/MBProgressHUD.m; sourceTree = SOURCE_ROOT; };
 		4C6F97C614AF74E200F8389A /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
+		91A32A7E1AB4394F009BFA90 /* MWVideo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MWVideo.h; path = MWPhotoBrowser/Classes/MWVideo.h; sourceTree = "<group>"; };
+		91A32A7F1AB4394F009BFA90 /* MWVideo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MWVideo.m; path = MWPhotoBrowser/Classes/MWVideo.m; sourceTree = "<group>"; };
+		91A32A841AB43F0A009BFA90 /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -138,6 +144,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				91A32A851AB43F0A009BFA90 /* MediaPlayer.framework in Frameworks */,
 				0E3CF61A18CF321F000EC5F2 /* MapKit.framework in Frameworks */,
 				0E8515CA17FCB05B00FE1EF3 /* AssetsLibrary.framework in Frameworks */,
 				0E8515C417FC780500FE1EF3 /* QuartzCore.framework in Frameworks */,
@@ -181,6 +188,7 @@
 		4C6F96C614AF704100F8389A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				91A32A841AB43F0A009BFA90 /* MediaPlayer.framework */,
 				0E3CF61918CF321F000EC5F2 /* MapKit.framework */,
 				0E8515C917FCB05B00FE1EF3 /* AssetsLibrary.framework */,
 				0E8515C317FC780500FE1EF3 /* QuartzCore.framework */,
@@ -200,6 +208,8 @@
 				4C6F96DB14AF70BD00F8389A /* MWPhotoBrowser.m */,
 				4C6F96D814AF70BD00F8389A /* MWPhoto.h */,
 				4C6F96D914AF70BD00F8389A /* MWPhoto.m */,
+				91A32A7E1AB4394F009BFA90 /* MWVideo.h */,
+				91A32A7F1AB4394F009BFA90 /* MWVideo.m */,
 				2CA395151AB188130061494C /* MWMediaItem.h */,
 				2CA395161AB188130061494C /* MWMediaItem.m */,
 				4C6F96D614AF70BD00F8389A /* MWCaptionView.h */,
@@ -326,6 +336,7 @@
 				0E17D76C17FAEADE0094ABF6 /* SDWebImageDownloader.h in Headers */,
 				2615E44B18CD57C700447857 /* NSData+ImageContentType.h in Headers */,
 				0E17D77517FAEADE0094ABF6 /* UIButton+WebCache.h in Headers */,
+				91A32A801AB4394F009BFA90 /* MWVideo.h in Headers */,
 				0E17D76617FAEADE0094ABF6 /* SDImageCache.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -385,6 +396,7 @@
 				0E17D77617FAEADE0094ABF6 /* UIButton+WebCache.m in Sources */,
 				0E17D77A17FAEADE0094ABF6 /* UIImage+MultiFormat.m in Sources */,
 				0E17D77417FAEADE0094ABF6 /* SDWebImagePrefetcher.m in Sources */,
+				91A32A811AB4394F009BFA90 /* MWVideo.m in Sources */,
 				4C6F96E314AF70BD00F8389A /* MWCaptionView.m in Sources */,
 				0EF66C6819CC8E0000BC267E /* UIView+WebCacheOperation.m in Sources */,
 				0EF66C6619CC8E0000BC267E /* UIImageView+HighlightedWebCache.m in Sources */,

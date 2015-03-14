@@ -105,7 +105,7 @@
 - (BOOL)areControlsHidden;
 
 // Data
-- (NSUInteger)numberOfPhotos;
+- (NSUInteger)numberOfMediaItems;
 - (MWMediaItem *)mediaItemAtIndex:(NSUInteger)index;
 - (UIImage *)imageForMediaItem:(MWMediaItem *)mediaItem;
 - (BOOL)mediaItemIsSelectedAtIndex:(NSUInteger)index;

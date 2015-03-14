@@ -19,6 +19,7 @@
 @property () NSUInteger index;
 @property (nonatomic) MWMediaItem *mediaItem;
 @property (nonatomic, weak) MWCaptionView *captionView;
+@property (nonatomic, strong) UIView *auxilaryView;
 @property (nonatomic, weak) UIButton *selectedButton;
 
 - (id)initWithBrowser:(MWPhotoBrowser *)browser;
