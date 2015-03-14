@@ -114,6 +114,8 @@
         [self.moviePlayer stop];
         [self.moviePlayer.view removeFromSuperview];
         self.moviePlayer = nil;
+        
+        _photoImageView.hidden = self.playButton.hidden = NO;
     }
 }
 
@@ -312,6 +314,7 @@
     [self attachGestureRecognizer];
     [self.moviePlayer prepareToPlay];
     [self.moviePlayer play];
+    _photoImageView.hidden = self.playButton.hidden = YES;
 }
 
 - (void)moviePlayBackDidFinish:(NSNotification*)notification
@@ -322,6 +325,8 @@
     [player.view removeFromSuperview];
     self.moviePlayer = nil;
     self.hasVideoSize = NO;
+    
+    _photoImageView.hidden = self.playButton.hidden = NO;
 }
 
 - (void)movieNaturalSizeAvailable:(NSNotification*)notification
