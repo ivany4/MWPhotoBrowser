@@ -55,4 +55,7 @@
 
 // Cancel any background loading of image data
 - (void)cancelAnyLoading;
+
+- (UIImage *)retrieveImage;
+
 @end

@@ -62,7 +62,6 @@
 // Data
 - (NSUInteger)numberOfMediaItems;
 - (MWMediaItem *)mediaItemAtIndex:(NSUInteger)index;
-- (UIImage *)imageForMediaItem:(MWMediaItem *)mediaItem;
 - (void)loadAdjacentMediaItemsIfNecessary:(MWMediaItem *)mediaItem;
 - (void)releaseAllUnderlyingPhotos:(BOOL)preserveCurrent;
 

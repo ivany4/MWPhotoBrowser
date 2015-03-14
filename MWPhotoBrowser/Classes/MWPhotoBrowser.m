@@ -589,18 +589,6 @@
     return captionView;
 }
 
-- (UIImage *)imageForMediaItem:(MWMediaItem *)mediaItem {
-    if (mediaItem) {
-        // Get image or obtain in background
-        if ([mediaItem underlyingImage]) {
-            return [mediaItem underlyingImage];
-        } else {
-            [mediaItem loadUnderlyingImageAndNotify];
-        }
-    }
-    return nil;
-}
-
 - (void)loadAdjacentMediaItemsIfNecessary:(MWMediaItem *)mediaItem {
     UIView<MWPhotoBrowserPage> *page = [self pageDisplayingMediaItem:mediaItem];
     if (page) {

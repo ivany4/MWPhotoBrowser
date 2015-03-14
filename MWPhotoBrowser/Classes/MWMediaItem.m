@@ -47,7 +47,8 @@
     return _underlyingImage;
 }
 
-- (void)loadUnderlyingImageAndNotify {
+- (void)loadUnderlyingImageAndNotify
+{
     NSAssert([[NSThread currentThread] isMainThread], @"This method must be called on the main thread.");
     if (_loadingInProgress) return;
     _loadingInProgress = YES;
@@ -162,6 +163,17 @@
         @throw [NSException exceptionWithName:nil reason:nil userInfo:nil];
         
     }
+}
+
+- (UIImage *)retrieveImage
+{
+    // Get image or obtain in background
+    if ([self underlyingImage]) {
+        return [self underlyingImage];
+    } else {
+        [self loadUnderlyingImageAndNotify];
+    }
+    return nil;
 }
 
 // Release if we can get it again from path or url

@@ -108,7 +108,7 @@
         }
     }
     _mediaItem = mediaItem;
-    UIImage *img = [_photoBrowser imageForMediaItem:_mediaItem];
+    UIImage *img = [_mediaItem retrieveImage];
     if (img) {
         [self displayContent];
     } else {
@@ -128,7 +128,7 @@
         self.contentSize = CGSizeMake(0, 0);
         
         // Get image from browser as it handles ordering of fetching
-        UIImage *img = [_photoBrowser imageForMediaItem:_mediaItem];
+        UIImage *img = [_mediaItem retrieveImage];
         if (img) {
             
             // Hide indicator

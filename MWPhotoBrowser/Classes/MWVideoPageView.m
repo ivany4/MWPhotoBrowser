@@ -122,7 +122,7 @@
     if (_mediaItem && _photoImageView.image == nil) {
         
         // Get image from browser as it handles ordering of fetching
-        UIImage *img = [_photoBrowser imageForMediaItem:_mediaItem];
+        UIImage *img = [_mediaItem retrieveImage];
         if (img) {
             
             // Hide indicator
