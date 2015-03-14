@@ -12,9 +12,11 @@
 
 static const CGFloat labelPadding = 10;
 
-@interface MWCaptionView ()
-@property (nonatomic, strong) MWMediaItem *mediaItem;
-@property (nonatomic, strong) UILabel *label;
+// Private
+@interface MWCaptionView () {
+    MWMediaItem *_mediaItem;
+    UILabel *_label;
+}
 @end
 
 @implementation MWCaptionView
@@ -28,6 +30,7 @@ static const CGFloat labelPadding = 10;
         self.barStyle = UIBarStyleBlackTranslucent;
         self.tintColor = nil;
         self.barTintColor = nil;
+        self.barStyle = UIBarStyleBlackTranslucent;
         [self setBackgroundImage:nil forToolbarPosition:UIBarPositionAny barMetrics:UIBarMetricsDefault];
         self.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleTopMargin|UIViewAutoresizingFlexibleLeftMargin|UIViewAutoresizingFlexibleRightMargin;
         [self setupCaption];
@@ -35,9 +38,8 @@ static const CGFloat labelPadding = 10;
     return self;
 }
 
-- (CGSize)sizeThatFits:(CGSize)size
-{
-    CGFloat maxHeight = DBL_MAX;
+- (CGSize)sizeThatFits:(CGSize)size {
+    CGFloat maxHeight = 9999;
     if (_label.numberOfLines > 0) maxHeight = _label.font.leading*_label.numberOfLines;
     CGSize textSize;
     textSize = [_label.text boundingRectWithSize:CGSizeMake(size.width - labelPadding*2, maxHeight)
@@ -48,23 +50,23 @@ static const CGFloat labelPadding = 10;
     return CGSizeMake(size.width, textSize.height + labelPadding * 2);
 }
 
-- (void)setupCaption
-{
-    _label = [[UILabel alloc] init];
-    _label.translatesAutoresizingMaskIntoConstraints = NO;
+- (void)setupCaption {
+    _label = [[UILabel alloc] initWithFrame:CGRectIntegral(CGRectMake(labelPadding, 0,
+                                                                      self.bounds.size.width-labelPadding*2,
+                                                                      self.bounds.size.height))];
     _label.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     _label.opaque = NO;
     _label.backgroundColor = [UIColor clearColor];
     _label.textAlignment = NSTextAlignmentCenter;
     _label.lineBreakMode = NSLineBreakByWordWrapping;
+    
     _label.numberOfLines = 0;
     _label.textColor = [UIColor whiteColor];
     _label.font = [UIFont systemFontOfSize:17];
-    _label.text = [_mediaItem caption];
+    if ([_mediaItem respondsToSelector:@selector(caption)]) {
+        _label.text = [_mediaItem caption] ?: @" ";
+    }
     [self addSubview:_label];
-    NSDictionary *views = @{@"label": _label};
-    [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-(x)-[label]-(x)-|" options:NSLayoutFormatAlignAllCenterX metrics:@{@"x": @10} views:views]];
-    [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[label]|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
 }
 
 
