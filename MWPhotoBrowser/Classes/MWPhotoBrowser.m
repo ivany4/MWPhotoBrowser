@@ -11,9 +11,60 @@
 #import "MWPhotoBrowser.h"
 #import "MWPhotoBrowserPrivate.h"
 #import "SDImageCache.h"
+#import "MWVideoPageView.h"
 
 #define PADDING                  10
 #define ACTION_SHEET_OLD_ACTIONS 2000
+
+@interface MWPhotoBrowser () {
+    
+    // Data
+    NSUInteger _mediaItemCount;
+    NSMutableArray *_mediaItems;
+    
+    // Views
+    UIScrollView *_pagingScrollView;
+    
+    // Paging & layout
+    NSMutableSet *_visiblePages, *_recycledPages;
+    NSUInteger _currentPageIndex;
+    NSUInteger _previousPageIndex;
+    CGRect _previousLayoutBounds;
+    NSUInteger _pageIndexBeforeRotation;
+    
+    // Navigation & controls
+    NSTimer *_controlVisibilityTimer;
+    UIBarButtonItem *_actionButton, *_doneButton;
+    MBProgressHUD *_progressHUD;
+    UIActionSheet *_actionsSheet;
+    
+    // Appearance
+    BOOL _controlsHidden;
+    BOOL _previousNavBarHidden;
+    BOOL _previousNavBarTranslucent;
+    UIBarStyle _previousNavBarStyle;
+    UIStatusBarStyle _previousStatusBarStyle;
+    UIColor *_previousNavBarTintColor;
+    UIColor *_previousNavBarBarTintColor;
+    UIBarButtonItem *_previousViewControllerBackButton;
+    UIImage *_previousNavigationBarBackgroundImageDefault;
+    UIImage *_previousNavigationBarBackgroundImageLandscapePhone;
+    
+    // Misc
+    BOOL _hasBelongedToViewController;
+    BOOL _isVCBasedStatusBarAppearance;
+    BOOL _statusBarShouldBeHidden;
+    BOOL _displayActionButton;
+    BOOL _leaveStatusBarAlone;
+    BOOL _performingLayout;
+    BOOL _rotating;
+    BOOL _viewIsActive; // active as in it's in the view heirarchy
+    BOOL _didSavePreviousStateOfNavBar;
+    BOOL _skipNextPagingScrollViewPositioning;
+    BOOL _viewHasAppearedInitially;
+    
+}
+@end
 
 @implementation MWPhotoBrowser
 
@@ -630,13 +681,15 @@
     for (NSUInteger index = (NSUInteger)iFirstIndex; index <= (NSUInteger)iLastIndex; index++) {
         if (![self isDisplayingPageForIndex:index]) {
             
+            MWMediaItem *mediaItem = [self mediaItemAtIndex:index];
+            
             // Add new page
-            UIView<MWPhotoBrowserPage> *page = [self dequeueRecycledPage];
+            UIView<MWPhotoBrowserPage> *page = [self dequeueRecycledPageForMediaItem:mediaItem];
             if (!page) {
-                page = [[MWZoomingScrollView alloc] initWithBrowser:self];
+                page = [[[mediaItem viewClass] alloc] initWithBrowser:self];
             }
             [_visiblePages addObject:page];
-            [self configurePage:page forIndex:index];
+            [self configurePage:page forIndex:index withMediaItem:mediaItem];
             
             [_pagingScrollView addSubview:page];
             MWLog(@"Added page at index %lu", (unsigned long)index);
@@ -681,14 +734,15 @@
     return thePage;
 }
 
-- (void)configurePage:(UIView<MWPhotoBrowserPage> *)page forIndex:(NSUInteger)index {
+- (void)configurePage:(UIView<MWPhotoBrowserPage> *)page forIndex:(NSUInteger)index withMediaItem:(MWMediaItem *)mediaItem
+{
     page.frame = [self frameForPageAtIndex:index];
     page.index = index;
-    page.mediaItem = [self mediaItemAtIndex:index];
+    page.mediaItem = mediaItem;
 }
 
-- (UIView<MWPhotoBrowserPage> *)dequeueRecycledPage {
-    UIView<MWPhotoBrowserPage> *page = [_recycledPages anyObject];
+- (UIView<MWPhotoBrowserPage> *)dequeueRecycledPageForMediaItem:(MWMediaItem *)mediaItem {
+    UIView<MWPhotoBrowserPage> *page = [[_recycledPages filteredSetUsingPredicate:[NSPredicate predicateWithFormat:@"class == %@", [mediaItem viewClass]]] anyObject];
     if (page) {
         [_recycledPages removeObject:page];
     }
@@ -735,15 +789,6 @@
     if ([currentMediaItem underlyingImage]) {
         // photo loaded so load ajacent now
         [self loadAdjacentMediaItemsIfNecessary:currentMediaItem];
-    }
-    
-    if ([currentMediaItem respondsToSelector:@selector(mediaItemDidAriveToView:)]) {
-        for (UIView<MWPhotoBrowserPage> *page in _visiblePages) {
-            if (page.index == self.currentIndex) {
-                [currentMediaItem mediaItemDidAriveToView:page];
-                break;
-            }
-        }
     }
     
     // Notify delegate
@@ -834,9 +879,10 @@
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
     // Hide controls when dragging begins
     //	[self setControlsHidden:YES animated:YES permanent:NO];
-    MWMediaItem *currentItem = _mediaItems[self.currentIndex];
-    if ([currentItem respondsToSelector:@selector(mediaItemStartedDragging)]) {
-        [currentItem mediaItemStartedDragging];
+    for (UIView<MWPhotoBrowserPage> *page in _visiblePages) {
+        if ([page isKindOfClass:[MWVideoPageView class]]) {
+            [(MWVideoPageView *)page pausePlayback];
+        }
     }
 }
 

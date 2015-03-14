@@ -8,6 +8,7 @@
 
 #import "MWPhoto.h"
 #import "MWPhotoBrowser.h"
+#import "MWZoomingScrollView.h"
 
 
 @implementation MWPhoto
@@ -16,9 +17,13 @@
 #pragma mark - Class Methods
 
 + (instancetype)photoWithImage:(UIImage *)image {
-	return [[MWPhoto alloc] initWithImage:image];
+    return [[MWPhoto alloc] initWithImage:image];
 }
 
+- (Class)viewClass
+{
+    return [MWZoomingScrollView class];
+}
 
 - (id)initWithImage:(UIImage *)image {
     if ((self = [super init])) {

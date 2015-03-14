@@ -9,56 +9,12 @@
 #import <UIKit/UIKit.h>
 #import "MBProgressHUD.h"
 #import "MWZoomingScrollView.h"
+#import "MWPhotoBrowser.h"
+#import "MWMediaItem.h"
+#import "MWPhotoBrowserPage.h"
 
 // Declare private methods of browser
-@interface MWPhotoBrowser () {
-    
-	// Data
-    NSUInteger _mediaItemCount;
-    NSMutableArray *_mediaItems;
-	
-	// Views
-	UIScrollView *_pagingScrollView;
-	
-	// Paging & layout
-	NSMutableSet *_visiblePages, *_recycledPages;
-	NSUInteger _currentPageIndex;
-    NSUInteger _previousPageIndex;
-    CGRect _previousLayoutBounds;
-	NSUInteger _pageIndexBeforeRotation;
-	
-	// Navigation & controls
-	NSTimer *_controlVisibilityTimer;
-	UIBarButtonItem *_actionButton, *_doneButton;
-    MBProgressHUD *_progressHUD;
-    UIActionSheet *_actionsSheet;
-        
-    // Appearance
-    BOOL _controlsHidden;
-    BOOL _previousNavBarHidden;
-    BOOL _previousNavBarTranslucent;
-    UIBarStyle _previousNavBarStyle;
-    UIStatusBarStyle _previousStatusBarStyle;
-    UIColor *_previousNavBarTintColor;
-    UIColor *_previousNavBarBarTintColor;
-    UIBarButtonItem *_previousViewControllerBackButton;
-    UIImage *_previousNavigationBarBackgroundImageDefault;
-    UIImage *_previousNavigationBarBackgroundImageLandscapePhone;
-    
-    // Misc
-    BOOL _hasBelongedToViewController;
-    BOOL _isVCBasedStatusBarAppearance;
-    BOOL _statusBarShouldBeHidden;
-    BOOL _displayActionButton;
-    BOOL _leaveStatusBarAlone;
-	BOOL _performingLayout;
-	BOOL _rotating;
-    BOOL _viewIsActive; // active as in it's in the view heirarchy
-    BOOL _didSavePreviousStateOfNavBar;
-    BOOL _skipNextPagingScrollViewPositioning;
-    BOOL _viewHasAppearedInitially;
-    
-}
+@interface MWPhotoBrowser (Private)
 
 // Properties
 @property (nonatomic) UIActivityViewController *activityViewController;
@@ -78,8 +34,8 @@
 - (BOOL)isDisplayingPageForIndex:(NSUInteger)index;
 - (UIView<MWPhotoBrowserPage> *)pageDisplayedAtIndex:(NSUInteger)index;
 - (UIView<MWPhotoBrowserPage> *)pageDisplayingMediaItem:(MWMediaItem *)mediaItem;
-- (UIView<MWPhotoBrowserPage> *)dequeueRecycledPage;
-- (void)configurePage:(UIView<MWPhotoBrowserPage> *)page forIndex:(NSUInteger)index;
+- (UIView<MWPhotoBrowserPage> *)dequeueRecycledPageForMediaItem:(MWMediaItem *)mediaItem;
+- (void)configurePage:(UIView<MWPhotoBrowserPage> *)page forIndex:(NSUInteger)index withMediaItem:(MWMediaItem *)mediaItem;
 - (void)didStartViewingPageAtIndex:(NSUInteger)index;
 
 // Frames

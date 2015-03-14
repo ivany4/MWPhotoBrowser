@@ -8,66 +8,11 @@
 
 #import <UIKit/UIKit.h>
 #import "MBProgressHUD.h"
-#import "MWGridViewController.h"
 #import "MWZoomingScrollView.h"
+#import "MWPhotoBrowser.h"
 
 // Declare private methods of browser
-@interface MWPhotoBrowser () {
-    
-	// Data
-    NSUInteger _photoCount;
-    NSMutableArray *_photos;
-    NSMutableArray *_thumbPhotos;
-	NSArray *_depreciatedPhotoData; // Depreciated
-	
-	// Views
-	UIScrollView *_pagingScrollView;
-	
-	// Paging & layout
-	NSMutableSet *_visiblePages, *_recycledPages;
-	NSUInteger _currentPageIndex;
-    NSUInteger _previousPageIndex;
-    CGRect _previousLayoutBounds;
-	NSUInteger _pageIndexBeforeRotation;
-	
-	// Navigation & controls
-	UIToolbar *_toolbar;
-	NSTimer *_controlVisibilityTimer;
-	UIBarButtonItem *_previousButton, *_nextButton, *_actionButton, *_doneButton;
-    MBProgressHUD *_progressHUD;
-    UIActionSheet *_actionsSheet;
-    
-    // Grid
-    MWGridViewController *_gridController;
-    UIBarButtonItem *_gridPreviousLeftNavItem;
-    UIBarButtonItem *_gridPreviousRightNavItem;
-    
-    // Appearance
-    BOOL _previousNavBarHidden;
-    BOOL _previousNavBarTranslucent;
-    UIBarStyle _previousNavBarStyle;
-    UIStatusBarStyle _previousStatusBarStyle;
-    UIColor *_previousNavBarTintColor;
-    UIColor *_previousNavBarBarTintColor;
-    UIBarButtonItem *_previousViewControllerBackButton;
-    UIImage *_previousNavigationBarBackgroundImageDefault;
-    UIImage *_previousNavigationBarBackgroundImageLandscapePhone;
-    
-    // Misc
-    BOOL _hasBelongedToViewController;
-    BOOL _isVCBasedStatusBarAppearance;
-    BOOL _statusBarShouldBeHidden;
-    BOOL _displayActionButton;
-    BOOL _leaveStatusBarAlone;
-	BOOL _performingLayout;
-	BOOL _rotating;
-    BOOL _viewIsActive; // active as in it's in the view heirarchy
-    BOOL _didSavePreviousStateOfNavBar;
-    BOOL _skipNextPagingScrollViewPositioning;
-    BOOL _viewHasAppearedInitially;
-    CGPoint _currentGridContentOffset;
-    
-}
+@interface MWPhotoBrowser (Private)
 
 // Properties
 @property (nonatomic) UIActivityViewController *activityViewController;
@@ -85,10 +30,10 @@
 // Paging
 - (void)tilePages;
 - (BOOL)isDisplayingPageForIndex:(NSUInteger)index;
-- (MWZoomingScrollView *)pageDisplayedAtIndex:(NSUInteger)index;
-- (MWZoomingScrollView *)pageDisplayingPhoto:(id<MWPhoto>)photo;
-- (MWZoomingScrollView *)dequeueRecycledPage;
-- (void)configurePage:(MWZoomingScrollView *)page forIndex:(NSUInteger)index;
+- (UIView<MWPhotoBrowserPage> *)pageDisplayedAtIndex:(NSUInteger)index;
+- (UIView<MWPhotoBrowserPage> *)pageDisplayingMediaItem:(MWMediaItem *)mediaItem;
+- (UIView<MWPhotoBrowserPage> *)dequeueRecycledPageForMediaItem:(MWMediaItem *)mediaItem;
+- (void)configurePage:(UIView<MWPhotoBrowserPage> *)page forIndex:(NSUInteger)index withMediaItem:(MWMediaItem *)mediaItem;
 - (void)didStartViewingPageAtIndex:(NSUInteger)index;
 
 // Frames
@@ -98,17 +43,12 @@
 - (CGPoint)contentOffsetForPageAtIndex:(NSUInteger)index;
 - (CGRect)frameForToolbarAtOrientation:(UIInterfaceOrientation)orientation;
 - (CGRect)frameForCaptionView:(MWCaptionView *)captionView atIndex:(NSUInteger)index;
-- (CGRect)frameForSelectedButton:(UIButton *)selectedButton atIndex:(NSUInteger)index;
 
 // Navigation
 - (void)updateNavigation;
 - (void)jumpToPageAtIndex:(NSUInteger)index animated:(BOOL)animated;
 - (void)gotoPreviousPage;
 - (void)gotoNextPage;
-
-// Grid
-- (void)showGrid:(BOOL)animated;
-- (void)hideGrid;
 
 // Controls
 - (void)cancelControlHiding;
@@ -118,19 +58,16 @@
 - (BOOL)areControlsHidden;
 
 // Data
-- (NSUInteger)numberOfPhotos;
-- (id<MWPhoto>)photoAtIndex:(NSUInteger)index;
-- (id<MWPhoto>)thumbPhotoAtIndex:(NSUInteger)index;
-- (UIImage *)imageForPhoto:(id<MWPhoto>)photo;
-- (BOOL)photoIsSelectedAtIndex:(NSUInteger)index;
-- (void)setPhotoSelected:(BOOL)selected atIndex:(NSUInteger)index;
-- (void)loadAdjacentPhotosIfNecessary:(id<MWPhoto>)photo;
+- (NSUInteger)numberOfMediaItems;
+- (MWMediaItem *)mediaItemAtIndex:(NSUInteger)index;
+- (UIImage *)imageForMediaItem:(MWMediaItem *)mediaItem;
+- (void)loadAdjacentMediaItemsIfNecessary:(MWMediaItem *)mediaItem;
 - (void)releaseAllUnderlyingPhotos:(BOOL)preserveCurrent;
 
 // Actions
-- (void)savePhoto;
-- (void)copyPhoto;
-- (void)emailPhoto;
+- (void)saveMediaItem;
+- (void)copyMediaItem;
+- (void)emailMediaItem;
 
 @end
 

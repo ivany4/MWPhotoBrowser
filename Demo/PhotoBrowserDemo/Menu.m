@@ -107,7 +107,7 @@
 	switch (indexPath.row) {
 		case 0: {
             cell.textLabel.text = @"Single photo";
-            cell.detailTextLabel.text = @"with caption, no grid button";
+            cell.detailTextLabel.text = @"with caption";
             break;
         }
         case 1: {

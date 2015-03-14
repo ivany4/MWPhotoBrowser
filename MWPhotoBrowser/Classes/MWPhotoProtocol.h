@@ -1,23 +1,27 @@
 //
-//  MWMediaItem.h
+//  MWPhotoProtocol.h
 //  MWPhotoBrowser
 //
-//  Created by Ivan on 12/03/15.
-//
+//  Created by Michael Waterfall on 02/01/2012.
+//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 
+// Notifications
 #define MWPHOTO_LOADING_DID_END_NOTIFICATION @"MWPHOTO_LOADING_DID_END_NOTIFICATION"
 #define MWPHOTO_PROGRESS_NOTIFICATION @"MWPHOTO_PROGRESS_NOTIFICATION"
 
-@interface MWMediaItem : NSObject
-@property (nonatomic, strong) NSString *caption;
-@property (nonatomic, readonly) NSURL *URL;
-@property (nonatomic, assign) BOOL isVideo;
-- (Class)viewClass;
-- (id)initWithURL:(NSURL *)url;
-+ (instancetype)mediaItemWithURL:(NSURL *)url;
+// If you wish to use your own data models for photo then they must conform
+// to this protocol. See instructions for details on each method.
+// Otherwise you can use the MWPhoto object or subclass it yourself to
+// store more information per photo.
+//
+// You can see the MWPhoto class for an example implementation of this protocol
+//
+@protocol MWPhoto <NSObject>
+
+@required
 
 // Return underlying UIImage to be displayed
 // Return nil if the image is not immediately available (loaded into memory, preferably
@@ -48,6 +52,7 @@
 // as long as the image can be re-loaded (from cache, file, or URL)
 - (void)unloadUnderlyingImage;
 
+@optional
 
 // Return a caption string to be displayed over the image
 // Return nil to display no caption
@@ -55,4 +60,5 @@
 
 // Cancel any background loading of image data
 - (void)cancelAnyLoading;
+
 @end

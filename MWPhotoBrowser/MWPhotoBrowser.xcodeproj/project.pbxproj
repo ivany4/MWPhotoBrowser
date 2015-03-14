@@ -48,7 +48,9 @@
 		2615E44C18CD57C700447857 /* NSData+ImageContentType.m in Sources */ = {isa = PBXBuildFile; fileRef = 2615E44A18CD57C700447857 /* NSData+ImageContentType.m */; };
 		2615E44F18CD57E500447857 /* MKAnnotationView+WebCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 2615E44D18CD57E500447857 /* MKAnnotationView+WebCache.h */; };
 		2615E45018CD57E500447857 /* MKAnnotationView+WebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 2615E44E18CD57E500447857 /* MKAnnotationView+WebCache.m */; };
-		2C6F358D1AB4574200897A41 /* MWPhotoBrowserPage.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C6F358C1AB4574200897A41 /* MWPhotoBrowserPage.h */; };
+		2C2B04D31AB46603005A794E /* MWPhotoBrowserPage.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C6F358C1AB4574200897A41 /* MWPhotoBrowserPage.h */; };
+		2C6F35901AB45FFD00897A41 /* MWVideoPageView.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C6F358E1AB45FFD00897A41 /* MWVideoPageView.h */; };
+		2C6F35911AB45FFD00897A41 /* MWVideoPageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2C6F358F1AB45FFD00897A41 /* MWVideoPageView.m */; };
 		2CA395171AB188130061494C /* MWMediaItem.h in Headers */ = {isa = PBXBuildFile; fileRef = 2CA395151AB188130061494C /* MWMediaItem.h */; };
 		2CA395181AB188130061494C /* MWMediaItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 2CA395161AB188130061494C /* MWMediaItem.m */; };
 		4C6F96C814AF704100F8389A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C6F96C714AF704100F8389A /* Foundation.framework */; };
@@ -113,6 +115,8 @@
 		2615E44D18CD57E500447857 /* MKAnnotationView+WebCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "MKAnnotationView+WebCache.h"; path = "Libraries/SDWebImage/SDWebImage/MKAnnotationView+WebCache.h"; sourceTree = SOURCE_ROOT; };
 		2615E44E18CD57E500447857 /* MKAnnotationView+WebCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "MKAnnotationView+WebCache.m"; path = "Libraries/SDWebImage/SDWebImage/MKAnnotationView+WebCache.m"; sourceTree = SOURCE_ROOT; };
 		2C6F358C1AB4574200897A41 /* MWPhotoBrowserPage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MWPhotoBrowserPage.h; path = MWPhotoBrowser/Classes/MWPhotoBrowserPage.h; sourceTree = "<group>"; };
+		2C6F358E1AB45FFD00897A41 /* MWVideoPageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MWVideoPageView.h; path = MWPhotoBrowser/Classes/MWVideoPageView.h; sourceTree = "<group>"; };
+		2C6F358F1AB45FFD00897A41 /* MWVideoPageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MWVideoPageView.m; path = MWPhotoBrowser/Classes/MWVideoPageView.m; sourceTree = "<group>"; };
 		2CA395151AB188130061494C /* MWMediaItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MWMediaItem.h; path = MWPhotoBrowser/Classes/MWMediaItem.h; sourceTree = "<group>"; };
 		2CA395161AB188130061494C /* MWMediaItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MWMediaItem.m; path = MWPhotoBrowser/Classes/MWMediaItem.m; sourceTree = "<group>"; };
 		4C6F96C414AF704100F8389A /* libMWPhotoBrowser.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libMWPhotoBrowser.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -212,6 +216,8 @@
 				2CA395161AB188130061494C /* MWMediaItem.m */,
 				4C6F96D614AF70BD00F8389A /* MWCaptionView.h */,
 				4C6F96D714AF70BD00F8389A /* MWCaptionView.m */,
+				2C6F358E1AB45FFD00897A41 /* MWVideoPageView.h */,
+				2C6F358F1AB45FFD00897A41 /* MWVideoPageView.m */,
 				4C6F96E014AF70BD00F8389A /* MWZoomingScrollView.h */,
 				4C6F96E114AF70BD00F8389A /* MWZoomingScrollView.m */,
 				4C6F96DE14AF70BD00F8389A /* MWTapDetectingView.h */,
@@ -298,6 +304,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2C6F35901AB45FFD00897A41 /* MWVideoPageView.h in Headers */,
 				0E8515C117FC77D200FE1EF3 /* DACircularProgressView.h in Headers */,
 				0E17D76817FAEADE0094ABF6 /* SDWebImageCompat.h in Headers */,
 				0EF66C6519CC8E0000BC267E /* UIImageView+HighlightedWebCache.h in Headers */,
@@ -308,11 +315,11 @@
 				4C6F96E614AF70BD00F8389A /* MWPhotoBrowser.h in Headers */,
 				2615E44F18CD57E500447857 /* MKAnnotationView+WebCache.h in Headers */,
 				0E17D76A17FAEADE0094ABF6 /* SDWebImageDecoder.h in Headers */,
+				2C2B04D31AB46603005A794E /* MWPhotoBrowserPage.h in Headers */,
 				0E17D77917FAEADE0094ABF6 /* UIImage+MultiFormat.h in Headers */,
 				0E17D76E17FAEADE0094ABF6 /* SDWebImageDownloaderOperation.h in Headers */,
 				0E17D77D17FAEADE0094ABF6 /* UIImageView+WebCache.h in Headers */,
 				4C6F96EA14AF70BD00F8389A /* MWTapDetectingView.h in Headers */,
-				2C6F358D1AB4574200897A41 /* MWPhotoBrowserPage.h in Headers */,
 				4C6F96EC14AF70BD00F8389A /* MWZoomingScrollView.h in Headers */,
 				4C6F96F614AF710800F8389A /* MBProgressHUD.h in Headers */,
 				2CA395171AB188130061494C /* MWMediaItem.h in Headers */,
@@ -399,6 +406,7 @@
 				4C6F96E714AF70BD00F8389A /* MWPhotoBrowser.m in Sources */,
 				0E17D76D17FAEADE0094ABF6 /* SDWebImageDownloader.m in Sources */,
 				4C6F96EB14AF70BD00F8389A /* MWTapDetectingView.m in Sources */,
+				2C6F35911AB45FFD00897A41 /* MWVideoPageView.m in Sources */,
 				4C6F96ED14AF70BD00F8389A /* MWZoomingScrollView.m in Sources */,
 				0E17D77117FAEADE0094ABF6 /* SDWebImageManager.m in Sources */,
 				4C6F96F714AF710800F8389A /* MBProgressHUD.m in Sources */,

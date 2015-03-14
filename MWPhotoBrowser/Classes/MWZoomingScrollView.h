@@ -13,6 +13,6 @@
 @class MWPhotoBrowser, MWMediaItem, MWCaptionView;
 
 @interface MWZoomingScrollView : UIScrollView <UIScrollViewDelegate, MWTapDetectingViewDelegate, MWPhotoBrowserPage> {
-
+    
 }
 @end
