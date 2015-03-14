@@ -41,16 +41,19 @@
         _photoImageView.contentMode = UIViewContentModeScaleAspectFit;
         _photoImageView.backgroundColor = [UIColor blueColor];
         _photoImageView.userInteractionEnabled = NO;
-//        _photoImageView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
         [self addSubview:_photoImageView];
         
+        UIView *dim = [[UIView alloc] initWithFrame:self.bounds];
+        dim.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
+        dim.backgroundColor = [UIColor colorWithWhite:0 alpha:0.3];
+        dim.userInteractionEnabled = NO;
+        [self addSubview:dim];
         
         _playButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        _playButton.frame = CGRectMake(0, 0, 200, 200);
-        _playButton.backgroundColor = [UIColor colorWithWhite:0 alpha:0.3];
-        [_playButton setTitle:@"PLAY" forState:UIControlStateNormal];
-        [_playButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-        _playButton.titleLabel.font = [UIFont boldSystemFontOfSize:20];
+        _playButton.frame = CGRectMake(0, 0, 150, 150);
+        _playButton.tintColor = [UIColor colorWithWhite:1 alpha:0.5];
+        [_playButton setImage:[[UIImage imageNamed:@"play"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate] forState:UIControlStateNormal];
+        [_playButton setImage:[UIImage imageNamed:@"play"] forState:UIControlStateHighlighted];
         _playButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin|UIViewAutoresizingFlexibleRightMargin|UIViewAutoresizingFlexibleTopMargin|UIViewAutoresizingFlexibleBottomMargin;
         [_playButton addTarget:self action:@selector(playVideo:) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:_playButton];
@@ -164,7 +167,7 @@
             // Set image
             _photoImageView.image = img;
             
-            [self resizeView:_photoImageView toSize:img.size];
+            _photoImageView.frame = [self frameForViewWithContentSize:img.size];
             
         } else {
             
@@ -184,7 +187,7 @@
     return CGRectIntegral(origFrame);
 }
 
-- (void)resizeView:(UIView *)view toSize:(CGSize)size
+- (CGRect)frameForViewWithContentSize:(CGSize)size
 {
     CGRect fullSizeRect = CGRectZero;
     fullSizeRect.size = size;
@@ -195,14 +198,14 @@
     CGFloat scale = 1;
     
     if (hScale >= 1 && vScale >= 1) {
-        view.frame = [self frameFittingInBounds:fullSizeRect];
+        return [self frameFittingInBounds:fullSizeRect];
     }
     else {
         scale = MIN(hScale, vScale);
         CGRect newFrame = fullSizeRect;
         newFrame.size.width *= scale;
         newFrame.size.height *= scale;
-        view.frame = [self frameFittingInBounds:newFrame];
+        return [self frameFittingInBounds:newFrame];
     }
 }
 
@@ -270,7 +273,7 @@
                                          _loadingError.frame.size.width,
                                          _loadingError.frame.size.height);
     
-    [self resizeView:_photoImageView toSize:_photoImageView.image.size];
+    _photoImageView.frame = [self frameForViewWithContentSize:_photoImageView.image.size];
 
     if (self.moviePlayer) {
         [self layoutVideoFrame];
@@ -283,7 +286,7 @@
 - (void)layoutVideoFrame
 {
     if (self.hasVideoSize) {
-        [self resizeView:self.moviePlayer.view toSize:self.videoSize];
+        self.moviePlayer.view.frame = [self frameForViewWithContentSize:self.videoSize];
     }
     else {
         self.moviePlayer.view.frame = _photoImageView.frame;
@@ -297,24 +300,23 @@
 {
     NSURL *url = [NSURL URLWithString:@"http://www.ebookfrenzy.com/ios_book/movie/movie.mov"];
     
-    self.moviePlayer = [[MPMoviePlayerController alloc]
-                        initWithContentURL:url];
-    
+    self.moviePlayer = [[MPMoviePlayerController alloc] initWithContentURL:url];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(moviePlayBackDidFinish:) name:MPMoviePlayerPlaybackDidFinishNotification object:self.moviePlayer];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(movieNaturalSizeAvailable:) name:MPMovieNaturalSizeAvailableNotification object:self.moviePlayer];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(detachGestureRecognizer) name:MPMoviePlayerWillEnterFullscreenNotification object:self.moviePlayer];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(attachGestureRecognizer) name:MPMoviePlayerDidExitFullscreenNotification object:self.moviePlayer];
     
-    self.moviePlayer.controlStyle = MPMovieControlStyleEmbedded;
+    self.moviePlayer.controlStyle = MPMovieControlStyleNone;
     self.moviePlayer.shouldAutoplay = YES;
     self.moviePlayer.view.translatesAutoresizingMaskIntoConstraints = YES;
     [self insertSubview:self.moviePlayer.view aboveSubview:self.playButton];
     [self layoutVideoFrame];
     [self attachGestureRecognizer];
+    _photoImageView.hidden = self.playButton.hidden = YES;
+    
     [self.moviePlayer prepareToPlay];
     [self.moviePlayer play];
-    _photoImageView.hidden = self.playButton.hidden = YES;
 }
 
 - (void)moviePlayBackDidFinish:(NSNotification*)notification
