@@ -54,8 +54,5 @@
 // Set page that photo browser starts on
 - (void)setCurrentMediaItemIndex:(NSUInteger)index;
 
-// Navigation
-- (void)showNextMediaItemAnimated:(BOOL)animated;
-- (void)showPreviousMediaItemAnimated:(BOOL)animated;
 
 @end

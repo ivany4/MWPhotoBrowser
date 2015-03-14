@@ -22,8 +22,6 @@
     DACircularProgressView *_loadingIndicator;
     UIImageView *_loadingError;
 }
-
-@property (nonatomic, strong) UIView *auxilaryView;
 @end
 
 @implementation MWZoomingScrollView
@@ -55,13 +53,8 @@
         // Loading indicator
         _loadingIndicator = [[DACircularProgressView alloc] initWithFrame:CGRectMake(140.0f, 30.0f, 40.0f, 40.0f)];
         _loadingIndicator.userInteractionEnabled = NO;
-        if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7")) {
-            _loadingIndicator.thicknessRatio = 0.1;
-            _loadingIndicator.roundedCorners = NO;
-        } else {
-            _loadingIndicator.thicknessRatio = 0.2;
-            _loadingIndicator.roundedCorners = YES;
-        }
+        _loadingIndicator.thicknessRatio = 0.1;
+        _loadingIndicator.roundedCorners = NO;
         _loadingIndicator.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleTopMargin |
         UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin;
         [self addSubview:_loadingIndicator];
@@ -88,13 +81,13 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
-- (void)prepareForReuse {
+- (void)prepareForReuse
+{
     [self hideImageFailure];
     self.mediaItem = nil;
     self.captionView = nil;
     _photoImageView.image = nil;
     _index = NSUIntegerMax;
-    [_auxilaryView removeFromSuperview], _auxilaryView = nil;
 }
 
 
@@ -333,12 +326,6 @@
     // Center
     if (!CGRectEqualToRect(_photoImageView.frame, frameToCenter))
         _photoImageView.frame = frameToCenter;
-    
-    
-    if (_auxilaryView) {
-        _auxilaryView.frame = self.bounds;
-    }
-    
 }
 
 #pragma mark - UIScrollViewDelegate

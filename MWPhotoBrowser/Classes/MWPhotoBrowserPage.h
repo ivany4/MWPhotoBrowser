@@ -11,7 +11,7 @@
 
 @class MWCaptionView, MWPhotoBrowser;
 @protocol MWPhotoBrowserPage <NSObject>
-@property (nonatomic) MWMediaItem *mediaItem;
+@property (nonatomic, strong) MWMediaItem *mediaItem;
 @property (nonatomic, weak) MWCaptionView *captionView;
 @property NSUInteger index;
 - (id)initWithBrowser:(MWPhotoBrowser *)browser;

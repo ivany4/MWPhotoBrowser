@@ -34,10 +34,11 @@
         _photoBrowser = browser;
         
         // Image view
-        _photoImageView = [[UIImageView alloc] initWithFrame:CGRectZero];
-        _photoImageView.contentMode = UIViewContentModeCenter;
-        _photoImageView.backgroundColor = [UIColor blackColor];
+        _photoImageView = [[UIImageView alloc] initWithFrame:self.bounds];
+        _photoImageView.contentMode = UIViewContentModeScaleAspectFit;
+        _photoImageView.backgroundColor = [UIColor blueColor];
         _photoImageView.userInteractionEnabled = NO;
+//        _photoImageView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
         [self addSubview:_photoImageView];
         
         
@@ -82,7 +83,7 @@
         
         // Setup
         self.tapDelegate = self;
-        self.backgroundColor = [UIColor blackColor];
+        self.backgroundColor = [UIColor redColor];
         self.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         
     }
@@ -116,6 +117,26 @@
     [self.moviePlayer pause];
 }
 
+#pragma mark - Image
+
+- (void)setMediaItem:(MWMediaItem *)mediaItem {
+    // Cancel any loading on old photo
+    if (_mediaItem && mediaItem == nil) {
+        if ([_mediaItem respondsToSelector:@selector(cancelAnyLoading)]) {
+            [_mediaItem cancelAnyLoading];
+        }
+    }
+    _mediaItem = mediaItem;
+    UIImage *img = [_mediaItem retrieveImage];
+    if (img) {
+        [self displayContent];
+    } else {
+        // Will be loading so show loading
+        [self showLoadingIndicator];
+    }
+}
+
+
 // Get and display image
 - (void)displayContent
 {
@@ -130,13 +151,8 @@
             
             // Set image
             _photoImageView.image = img;
-            _photoImageView.hidden = NO;
             
-            // Setup photo frame
-            CGRect photoImageViewFrame;
-            photoImageViewFrame.origin = CGPointZero;
-            photoImageViewFrame.size = img.size;
-            _photoImageView.frame = photoImageViewFrame;
+            [self updateImageFrame];
             
         } else {
             
@@ -147,6 +163,39 @@
         [self setNeedsLayout];
     }
 }
+
+- (void)fitImageFrameInBounds:(CGRect)imageFrame
+{
+    CGFloat hMargin = (self.bounds.size.width - imageFrame.size.width)/2.;
+    CGFloat vMargin = (self.bounds.size.height - imageFrame.size.height)/2.;
+    imageFrame.origin = CGPointMake(hMargin, vMargin);
+    _photoImageView.frame = CGRectIntegral(imageFrame);
+}
+
+- (void)updateImageFrame
+{
+    CGRect fullSizeRect = CGRectZero;
+    fullSizeRect.size = _photoImageView.image.size;
+    
+    CGFloat hScale = self.bounds.size.width/fullSizeRect.size.width;
+    CGFloat vScale = self.bounds.size.height/fullSizeRect.size.height;
+    
+    CGFloat scale = 1;
+    
+    if (hScale >= 1 && vScale >= 1) {
+        [self fitImageFrameInBounds:fullSizeRect];
+    }
+    else {
+        scale = MIN(hScale, vScale);
+        CGRect newFrame = fullSizeRect;
+        newFrame.size.width *= scale;
+        newFrame.size.height *= scale;
+        [self fitImageFrameInBounds:newFrame];
+    }
+}
+
+
+
 - (void)displayContentFailure
 {
     [self hideLoadingIndicator];
@@ -194,14 +243,36 @@
     [self hideImageFailure];
 }
 
+
+- (void)layoutSubviews {
+    
+    // Position indicators (centre does not seem to work!)
+    if (!_loadingIndicator.hidden)
+        _loadingIndicator.frame = CGRectMake(floorf((self.bounds.size.width - _loadingIndicator.frame.size.width) / 2.),
+                                             floorf((self.bounds.size.height - _loadingIndicator.frame.size.height) / 2),
+                                             _loadingIndicator.frame.size.width,
+                                             _loadingIndicator.frame.size.height);
+    if (_loadingError)
+        _loadingError.frame = CGRectMake(floorf((self.bounds.size.width - _loadingError.frame.size.width) / 2.),
+                                         floorf((self.bounds.size.height - _loadingError.frame.size.height) / 2),
+                                         _loadingError.frame.size.width,
+                                         _loadingError.frame.size.height);
+    
+    [self updateImageFrame];
+    if (self.moviePlayer) {
+        self.moviePlayer.view.frame = _photoImageView.frame;
+    }
+    
+    // Super
+    [super layoutSubviews];
+}
+
+
 #pragma mark - Video playback
 
 - (void)playVideo:(id)sender
 {
-    //    [[[UIAlertView alloc] initWithTitle:@"PLAY" message:nil delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] show];
-    
-    NSURL *url = [NSURL URLWithString:
-                  @"http://www.ebookfrenzy.com/ios_book/movie/movie.mov"];
+    NSURL *url = [NSURL URLWithString:@"http://www.ebookfrenzy.com/ios_book/movie/movie.mov"];
     
     self.moviePlayer = [[MPMoviePlayerController alloc]
                         initWithContentURL:url];
@@ -211,8 +282,10 @@
     self.moviePlayer.controlStyle = MPMovieControlStyleEmbedded;
     self.moviePlayer.shouldAutoplay = YES;
     [self insertSubview:self.moviePlayer.view aboveSubview:self.playButton];
-    self.moviePlayer.view.frame = _photoImageView.bounds;
-    [self.moviePlayer setFullscreen:YES animated:YES];
+    self.moviePlayer.view.frame = _photoImageView.frame;
+//    [self.moviePlayer setFullscreen:YES animated:YES];
+    [self.moviePlayer prepareToPlay];
+    [self.moviePlayer play];
 }
 
 - (void)moviePlayBackDidFinish:(NSNotification*)notification

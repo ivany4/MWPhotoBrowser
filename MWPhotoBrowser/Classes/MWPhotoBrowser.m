@@ -69,6 +69,7 @@
 @end
 
 @implementation MWPhotoBrowser
+@synthesize currentIndex = _currentPageIndex;
 
 #pragma mark - Init
 
@@ -93,7 +94,8 @@
     return self;
 }
 
-- (void)_initialisation {
+- (void)_initialisation
+{
     
     // Defaults
     NSNumber *isVCBasedStatusBarAppearanceNum = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"UIViewControllerBasedStatusBarAppearance"];
@@ -130,7 +132,8 @@
     
 }
 
-- (void)dealloc {
+- (void)dealloc
+{
     _pagingScrollView.delegate = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [self releaseAllUnderlyingPhotos:NO];
@@ -165,7 +168,8 @@
 #pragma mark - View Loading
 
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
-- (void)viewDidLoad {
+- (void)viewDidLoad
+{
     
     // View
     self.view.backgroundColor = [UIColor blackColor];
@@ -202,7 +206,8 @@
     
 }
 
-- (void)performLayout {
+- (void)performLayout
+{
     
     // Setup
     _performingLayout = YES;
@@ -261,7 +266,8 @@
     
 }
 
-- (BOOL)presentingViewControllerPrefersStatusBarHidden {
+- (BOOL)presentingViewControllerPrefersStatusBarHidden
+{
     UIViewController *presenting = self.presentingViewController;
     if (presenting) {
         if ([presenting isKindOfClass:[UINavigationController class]]) {
@@ -314,7 +320,8 @@
     
 }
 
-- (void)viewWillDisappear:(BOOL)animated {
+- (void)viewWillDisappear:(BOOL)animated
+{
     
     // Check that we're being popped for good
     if ([self.navigationController.viewControllers objectAtIndex:0] != self &&
@@ -376,7 +383,8 @@
     }
 }
 
-- (void)storePreviousNavBarAppearance {
+- (void)storePreviousNavBarAppearance
+{
     _didSavePreviousStateOfNavBar = YES;
     if ([UINavigationBar instancesRespondToSelector:@selector(barTintColor)]) {
         _previousNavBarBarTintColor = self.navigationController.navigationBar.barTintColor;
@@ -471,11 +479,8 @@
 
 #pragma mark - Rotation
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation {
-    return YES;
-}
-
-- (NSUInteger)supportedInterfaceOrientations {
+- (NSUInteger)supportedInterfaceOrientations
+{
     return UIInterfaceOrientationMaskAll;
 }
 
@@ -516,10 +521,6 @@
 }
 
 #pragma mark - Data
-
-- (NSUInteger)currentIndex {
-    return _currentPageIndex;
-}
 
 - (void)reloadData {
     
@@ -706,12 +707,7 @@
 
 - (UIView<MWPhotoBrowserPage> *)pageDisplayingMediaItem:(MWMediaItem *)mediaItem
 {
-    UIView<MWPhotoBrowserPage> *thePage = nil;
-    for (UIView<MWPhotoBrowserPage> *page in _visiblePages) {
-        if ([page.mediaItem isEqual:mediaItem]) {
-            thePage = page; break;
-        }
-    }
+    UIView<MWPhotoBrowserPage> *thePage = [[_visiblePages filteredSetUsingPredicate:[NSPredicate predicateWithFormat:@"mediaItem == %@", mediaItem]] anyObject];
     return thePage;
 }
 
@@ -774,8 +770,9 @@
     
     // Notify delegate
     if (index != _previousPageIndex) {
-        if ([_delegate respondsToSelector:@selector(browser:didDisplayMediaItemAtIndex:)])
+        if ([_delegate respondsToSelector:@selector(browser:didDisplayMediaItemAtIndex:)]) {
             [_delegate browser:self didDisplayMediaItemAtIndex:index];
+        }
         _previousPageIndex = index;
     }
     
