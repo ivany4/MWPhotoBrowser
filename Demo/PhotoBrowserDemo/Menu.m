@@ -141,7 +141,6 @@
     MWPhoto *photo;
     BOOL displayActionButton = YES;
     BOOL displaySelectionButtons = NO;
-    BOOL displayNavArrows = NO;
 	switch (indexPath.row) {
 		case 0:
             // Photos
@@ -197,7 +196,6 @@
 	// Create browser
 	MWPhotoBrowser *browser = [[MWPhotoBrowser alloc] initWithDelegate:self];
     browser.displayActionButton = displayActionButton;
-    browser.displayNavArrows = displayNavArrows;
     browser.alwaysShowControls = displaySelectionButtons;
     browser.zoomPhotosToFill = YES;
     browser.enableSwipeToDismiss = YES;
