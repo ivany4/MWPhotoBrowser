@@ -435,6 +435,7 @@
     self.moviePlayer = nil;
     self.hasVideoSize = NO;
     [self.captionView removeCustomConstrols];
+    self.captionView.frame = [_photoBrowser frameForCaptionView:self.captionView atIndex:self.index];
     
     _photoImageView.hidden = self.playButton.hidden = NO;
 }
