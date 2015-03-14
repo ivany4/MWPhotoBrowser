@@ -102,8 +102,9 @@
     _photoImageView.image = nil;
     _index = NSUIntegerMax;
     if (self.moviePlayer) {
-        [[NSNotificationCenter defaultCenter] removeObserver:self name:MPMoviePlayerPlaybackDidFinishNotification object:self.moviePlayer];
-        [self.moviePlayer.view removeFromSuperview], self.moviePlayer = nil;
+        [self.moviePlayer stop];
+        [self.moviePlayer.view removeFromSuperview];
+        self.moviePlayer = nil;
     }
 }
 
@@ -258,6 +259,7 @@
                                          _loadingError.frame.size.width,
                                          _loadingError.frame.size.height);
     
+    
     [self updateImageFrame];
     if (self.moviePlayer) {
         self.moviePlayer.view.frame = _photoImageView.frame;
@@ -277,10 +279,21 @@
     self.moviePlayer = [[MPMoviePlayerController alloc]
                         initWithContentURL:url];
     
+//    //Because UIScrollView conflicts with this
+//    for (UIView *view in self.moviePlayer.view.subviews) {
+//        for (UIPinchGestureRecognizer *pinch in view.gestureRecognizers) {
+//            if([pinch isKindOfClass:[UIPinchGestureRecognizer class]]) {
+//                [view removeGestureRecognizer:pinch];
+//                break;
+//            }
+//        }
+//    }
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(moviePlayBackDidFinish:) name:MPMoviePlayerPlaybackDidFinishNotification object:self.moviePlayer];
     
     self.moviePlayer.controlStyle = MPMovieControlStyleEmbedded;
     self.moviePlayer.shouldAutoplay = YES;
+    self.moviePlayer.view.translatesAutoresizingMaskIntoConstraints = YES;
     [self insertSubview:self.moviePlayer.view aboveSubview:self.playButton];
     self.moviePlayer.view.frame = _photoImageView.frame;
 //    [self.moviePlayer setFullscreen:YES animated:YES];
@@ -292,10 +305,7 @@
 {
     MPMoviePlayerController *player = [notification object];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:MPMoviePlayerPlaybackDidFinishNotification object:player];
-    
-    if ([player respondsToSelector:@selector(setFullscreen:animated:)]) {
-        [player.view removeFromSuperview];
-    }
+    [player.view removeFromSuperview];
     self.moviePlayer = nil;
 }
 

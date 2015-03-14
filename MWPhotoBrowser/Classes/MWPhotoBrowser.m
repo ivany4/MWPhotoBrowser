@@ -318,6 +318,8 @@
         _viewHasAppearedInitially = YES;
     }
     
+    [self layoutVisiblePages];
+    
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -353,6 +355,8 @@
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     _viewIsActive = YES;
+    
+    [self layoutVisiblePages];
 }
 
 - (void)willMoveToParentViewController:(UIViewController *)parent {
@@ -424,11 +428,7 @@
 
 #pragma mark - Layout
 
-- (void)viewWillLayoutSubviews {
-    [super viewWillLayoutSubviews];
-    [self layoutVisiblePages];
-}
-
+// Don't use this inside viewWillLayoutSubviews, because that one is triggered frequently when using MPMoviePlayerController
 - (void)layoutVisiblePages {
     
     // Flag
