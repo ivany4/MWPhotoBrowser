@@ -12,9 +12,66 @@
 #import <MediaPlayer/MediaPlayer.h>
 
 @interface MWControlsView : UIView
+@property (nonatomic, strong) UILabel *beforeLabel;
+@property (nonatomic, strong) UILabel *afterLabel;
 @end
 
 @implementation MWControlsView
+
+- (instancetype)init
+{
+    return [self initWithFrame:CGRectMake(0, 0, [UIApplication sharedApplication].keyWindow.frame.size.width, 44)];
+}
+
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    if (self = [super initWithFrame:frame]) {
+        [self setup];
+    }
+    return self;
+}
+
+- (id)initWithCoder:(NSCoder *)aDecoder
+{
+    if (self = [super initWithCoder:aDecoder]) {
+        [self setup];
+    }
+    return self;
+}
+
+- (void)setup
+{
+    UIButton *playButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [playButton setTitle:@"PL" forState:UIControlStateNormal];
+    [playButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    playButton.translatesAutoresizingMaskIntoConstraints = NO;
+    [self addSubview:playButton];
+    
+    UILabel *beforeLabel = [[UILabel alloc] init];
+    beforeLabel.backgroundColor = [UIColor clearColor];
+    beforeLabel.textColor = [UIColor whiteColor];
+    beforeLabel.translatesAutoresizingMaskIntoConstraints = NO;
+    beforeLabel.text = @"00:00";
+    [self addSubview:beforeLabel];
+    
+    UIButton *fullscreenButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    fullscreenButton.frame = CGRectMake(320-100-10, 0, 100, 44);
+    [fullscreenButton setTitle:@"FS" forState:UIControlStateNormal];
+    [fullscreenButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    fullscreenButton.translatesAutoresizingMaskIntoConstraints = NO;
+    [self addSubview:fullscreenButton];
+    
+    NSDictionary *views = NSDictionaryOfVariableBindings(playButton, beforeLabel, fullscreenButton);
+    [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"|-10-[playButton]-10-[beforeLabel]->=10-[fullscreenButton]-10-|" options:NSLayoutFormatAlignAllCenterY metrics:nil views:views]];
+    
+    for (UIView *view in self.subviews) {
+        [self addConstraint:[NSLayoutConstraint constraintWithItem:view attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
+    }
+    
+    self.backgroundColor = [UIColor darkGrayColor];
+    
+    [self layoutIfNeeded];
+}
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
 {
@@ -360,7 +417,7 @@
     [self.moviePlayer prepareToPlay];
     [self.moviePlayer play];
     
-    [self.captionView accommodateCustomControls:[self movieControls]];
+    [self.captionView accommodateCustomControls:[[MWControlsView alloc] init]];
     self.captionView.frame = [_photoBrowser frameForCaptionView:self.captionView atIndex:self.index];
     [self.captionView setNeedsLayout];
 }
@@ -431,31 +488,6 @@
     return [[[[UIApplication sharedApplication] windows] lastObject] subviews][0];
 }
 
-- (UIView *)movieControls
-{
-    MWControlsView *view = [[MWControlsView alloc] initWithFrame:CGRectMake(0, 0, 320, 44)];
-    
-    UIButton *playButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    playButton.frame = CGRectMake(0, 0, 100, 44);
-    [playButton setTitle:@"PL" forState:UIControlStateNormal];
-    [playButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [playButton addTarget:self action:@selector(togglePlayback:) forControlEvents:UIControlEventTouchUpInside];
-    playButton.autoresizingMask = UIViewAutoresizingFlexibleRightMargin|UIViewAutoresizingFlexibleBottomMargin;
-    [view addSubview:playButton];
-    
-    UIButton *fullscreenButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    fullscreenButton.frame = CGRectMake(320-100, 0, 100, 44);
-    [fullscreenButton setTitle:@"FS" forState:UIControlStateNormal];
-    [fullscreenButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [fullscreenButton addTarget:self action:@selector(toggleFullscreen:) forControlEvents:UIControlEventTouchUpInside];
-    fullscreenButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin|UIViewAutoresizingFlexibleBottomMargin;
-    [view addSubview:fullscreenButton];
-    
-    view.backgroundColor = [UIColor darkGrayColor];
-    
-    return view;
-}
-
 - (void)togglePlayback:(id)sender
 {
     if (self.moviePlayer.playbackState == MPMoviePlaybackStatePaused) {
@@ -469,6 +501,11 @@
 - (void)toggleFullscreen:(id)sender
 {
     [self.moviePlayer setFullscreen:YES animated:YES];
+}
+
+- (void)seekTo:(NSTimeInterval)time
+{
+    [self.moviePlayer setCurrentPlaybackTime:time];
 }
 
 #pragma mark - Tap handling
