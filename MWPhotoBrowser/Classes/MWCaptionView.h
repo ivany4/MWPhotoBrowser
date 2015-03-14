@@ -30,4 +30,7 @@
 // the full width of the screen
 - (CGSize)sizeThatFits:(CGSize)size;
 
+- (void)accommodateCustomControls:(UIView *)controlsContainer;
+- (void)removeCustomConstrols;
+
 @end

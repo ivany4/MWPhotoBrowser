@@ -11,7 +11,25 @@
 #import "MWPhotoBrowserPrivate.h"
 #import <MediaPlayer/MediaPlayer.h>
 
-@interface MWVideoPageView () <MWTapDetectingViewDelegate>
+@interface MWControlsView : UIView
+@end
+
+@implementation MWControlsView
+
+- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
+{
+    for (UIView *subview in self.subviews) {
+        UIView *hit = [subview hitTest:[subview convertPoint:point fromView:self] withEvent:event];
+        if (hit) {
+            return hit;
+        }
+    }
+    return nil;
+}
+
+@end
+
+@interface MWVideoPageView () <MWTapDetectingViewDelegate, UIGestureRecognizerDelegate>
 @property (nonatomic, weak) MWPhotoBrowser *photoBrowser;
 @property (nonatomic, strong) UIImageView *photoImageView;
 @property (nonatomic, strong) DACircularProgressView *loadingIndicator;
@@ -19,6 +37,8 @@
 @property (nonatomic, strong) UIButton *playButton;
 @property (nonatomic, strong) MPMoviePlayerController *moviePlayer;
 @property (nonatomic, strong) UITapGestureRecognizer *movieTap;
+@property (nonatomic, strong) UIPinchGestureRecognizer *moviePinch;
+@property (nonatomic, strong) UIPinchGestureRecognizer *fullscreenPinch;
 @property (nonatomic, assign) CGSize videoSize;
 @property (nonatomic, assign) BOOL hasVideoSize;
 @end
@@ -75,7 +95,6 @@
         
         
         
-        
         // Listen progress notifications
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(setProgressFromNotification:)
@@ -102,6 +121,11 @@
     if (self.moviePlayer) {
         [self.moviePlayer stop];
     }
+    
+    if (self.fullscreenPinch) {
+        [self detachFullscreenGestureRecognizer];
+        self.fullscreenPinch = nil;
+    }
 }
 
 - (void)prepareForReuse
@@ -113,6 +137,12 @@
     _index = NSUIntegerMax;
     self.hasVideoSize = NO;
     self.movieTap = nil;
+    self.moviePinch = nil;
+    if (self.fullscreenPinch) {
+        [self detachFullscreenGestureRecognizer];
+        self.fullscreenPinch = nil;
+    }
+    [self.captionView removeCustomConstrols];
     if (self.moviePlayer) {
         [self.moviePlayer stop];
         [self.moviePlayer.view removeFromSuperview];
@@ -306,17 +336,33 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(movieNaturalSizeAvailable:) name:MPMovieNaturalSizeAvailableNotification object:self.moviePlayer];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(detachGestureRecognizer) name:MPMoviePlayerWillEnterFullscreenNotification object:self.moviePlayer];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(attachGestureRecognizer) name:MPMoviePlayerDidExitFullscreenNotification object:self.moviePlayer];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(attachFullscreenGestureRecognizer) name:MPMoviePlayerDidEnterFullscreenNotification object:self.moviePlayer];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(detachFullscreenGestureRecognizer) name:MPMoviePlayerWillExitFullscreenNotification object:self.moviePlayer];
     
-    self.moviePlayer.controlStyle = MPMovieControlStyleNone;
     self.moviePlayer.shouldAutoplay = YES;
     self.moviePlayer.view.translatesAutoresizingMaskIntoConstraints = YES;
     [self insertSubview:self.moviePlayer.view aboveSubview:self.playButton];
     [self layoutVideoFrame];
+    
+    //Remove native pinches
+    for (UIView *view in self.moviePlayer.view.subviews) {
+        for (UIPinchGestureRecognizer *pinch in view.gestureRecognizers) {
+            if ([pinch isKindOfClass:[UIPinchGestureRecognizer class]]) {
+                [pinch.view removeGestureRecognizer:pinch];
+            }
+        }
+    }
+    
+    
     [self attachGestureRecognizer];
     _photoImageView.hidden = self.playButton.hidden = YES;
     
     [self.moviePlayer prepareToPlay];
     [self.moviePlayer play];
+    
+    [self.captionView accommodateCustomControls:[self movieControls]];
+    self.captionView.frame = [_photoBrowser frameForCaptionView:self.captionView atIndex:self.index];
+    [self.captionView setNeedsLayout];
 }
 
 - (void)moviePlayBackDidFinish:(NSNotification*)notification
@@ -326,9 +372,12 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self name:MPMovieNaturalSizeAvailableNotification object:player];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:MPMoviePlayerWillEnterFullscreenNotification object:player];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:MPMoviePlayerDidExitFullscreenNotification object:player];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:MPMoviePlayerDidEnterFullscreenNotification object:player];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:MPMoviePlayerWillExitFullscreenNotification object:player];
     [player.view removeFromSuperview];
     self.moviePlayer = nil;
     self.hasVideoSize = NO;
+    [self.captionView removeCustomConstrols];
     
     _photoImageView.hidden = self.playButton.hidden = NO;
 }
@@ -347,15 +396,98 @@
         self.movieTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(movieTapped:)];
         self.movieTap.numberOfTapsRequired = 1;
     }
+    if (!self.moviePinch) {
+        self.moviePinch = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(moviePinched:)];
+    }
     [self.moviePlayer.view addGestureRecognizer:self.movieTap];
+    [self.moviePlayer.view addGestureRecognizer:self.moviePinch];
+    self.moviePlayer.controlStyle = MPMovieControlStyleNone;
 }
 
 - (void)detachGestureRecognizer
 {
     [self.moviePlayer.view removeGestureRecognizer:self.movieTap];
+    [self.moviePlayer.view removeGestureRecognizer:self.moviePinch];
+    self.moviePlayer.controlStyle = MPMovieControlStyleFullscreen;
+}
+
+//Because none controls disable pinch gestures
+
+- (void)attachFullscreenGestureRecognizer
+{
+    if (!self.fullscreenPinch) {
+        self.fullscreenPinch = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(moviePinched:)];
+    }
+    [[self fullscreenGestureContainer] addGestureRecognizer:self.fullscreenPinch];
+}
+
+- (void)detachFullscreenGestureRecognizer
+{
+    [[self fullscreenGestureContainer] removeGestureRecognizer:self.fullscreenPinch];
+}
+
+- (UIView *)fullscreenGestureContainer
+{
+    return [[[[UIApplication sharedApplication] windows] lastObject] subviews][0];
+}
+
+- (UIView *)movieControls
+{
+    MWControlsView *view = [[MWControlsView alloc] initWithFrame:CGRectMake(0, 0, 320, 44)];
+    
+    UIButton *playButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    playButton.frame = CGRectMake(0, 0, 100, 44);
+    [playButton setTitle:@"PL" forState:UIControlStateNormal];
+    [playButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [playButton addTarget:self action:@selector(togglePlayback:) forControlEvents:UIControlEventTouchUpInside];
+    playButton.autoresizingMask = UIViewAutoresizingFlexibleRightMargin|UIViewAutoresizingFlexibleBottomMargin;
+    [view addSubview:playButton];
+    
+    UIButton *fullscreenButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    fullscreenButton.frame = CGRectMake(320-100, 0, 100, 44);
+    [fullscreenButton setTitle:@"FS" forState:UIControlStateNormal];
+    [fullscreenButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [fullscreenButton addTarget:self action:@selector(toggleFullscreen:) forControlEvents:UIControlEventTouchUpInside];
+    fullscreenButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin|UIViewAutoresizingFlexibleBottomMargin;
+    [view addSubview:fullscreenButton];
+    
+    view.backgroundColor = [UIColor darkGrayColor];
+    
+    return view;
+}
+
+- (void)togglePlayback:(id)sender
+{
+    if (self.moviePlayer.playbackState == MPMoviePlaybackStatePaused) {
+        [self.moviePlayer play];
+    }
+    else {
+        [self.moviePlayer pause];
+    }
+}
+
+- (void)toggleFullscreen:(id)sender
+{
+    [self.moviePlayer setFullscreen:YES animated:YES];
 }
 
 #pragma mark - Tap handling
+
+- (void)moviePinched:(UIPinchGestureRecognizer *)recognizer
+{
+    if (recognizer.state == UIGestureRecognizerStateEnded) {
+        if ([recognizer isEqual:self.moviePinch]) {
+            if (recognizer.velocity >= 5) {
+                [self.moviePlayer setFullscreen:YES animated:YES];
+            }
+        }
+        else if ([recognizer isEqual:self.fullscreenPinch]) {
+            if (recognizer.velocity <= -5) {
+                [self.moviePlayer setFullscreen:NO animated:YES];
+            }
+        }
+    }
+}
 
 - (void)movieTapped:(UITapGestureRecognizer *)recognizer
 {
@@ -372,6 +504,16 @@
 - (void)handleTap
 {
     [_photoBrowser performSelector:@selector(toggleControls) withObject:nil afterDelay:0.2];
+}
+
+#pragma mark - UIGestureRecognizerDelegate
+
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch {
+    return YES;
+}
+// this enables you to handle multiple recognizers on single view
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
+    return YES;
 }
 
 
