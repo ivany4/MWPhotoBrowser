@@ -16,9 +16,6 @@
 // Declare private methods of browser
 @interface MWPhotoBrowser (Private)
 
-// Properties
-@property (nonatomic) UIActivityViewController *activityViewController;
-
 // Layout
 - (void)layoutVisiblePages;
 - (void)performLayout;

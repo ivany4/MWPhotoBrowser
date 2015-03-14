@@ -8,7 +8,6 @@
 
 #import <QuartzCore/QuartzCore.h>
 #import "MWCommon.h"
-#import "MWPhotoBrowser.h"
 #import "MWPhotoBrowserPrivate.h"
 #import "SDImageCache.h"
 #import "MWVideoPageView.h"
@@ -64,6 +63,9 @@
     BOOL _viewHasAppearedInitially;
     
 }
+
+// Properties
+@property (nonatomic) UIActivityViewController *activityViewController;
 @end
 
 @implementation MWPhotoBrowser
