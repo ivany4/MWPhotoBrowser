@@ -31,8 +31,6 @@
 - (NSString *)browser:(MWPhotoBrowser *)browser titleForMediaItemAtIndex:(NSUInteger)index;
 - (void)browser:(MWPhotoBrowser *)browser didDisplayMediaItemAtIndex:(NSUInteger)index;
 - (void)browser:(MWPhotoBrowser *)browser actionButtonPressedForMediaItemAtIndex:(NSUInteger)index;
-- (BOOL)browser:(MWPhotoBrowser *)browser isMediaItemSelectedAtIndex:(NSUInteger)index;
-- (void)browser:(MWPhotoBrowser *)browser mediaItemAtIndex:(NSUInteger)index selectedChanged:(BOOL)selected;
 - (void)browserDidFinishModalPresentation:(MWPhotoBrowser *)browser;
 
 @end
@@ -43,7 +41,6 @@
 @property (nonatomic) BOOL zoomPhotosToFill;
 @property (nonatomic) BOOL displayNavArrows;
 @property (nonatomic) BOOL displayActionButton;
-@property (nonatomic) BOOL displaySelectionButtons;
 @property (nonatomic) BOOL alwaysShowControls;
 @property (nonatomic) BOOL enableSwipeToDismiss;
 @property (nonatomic) NSUInteger delayToHideElements;

@@ -7,25 +7,18 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "MWTapDetectingImageView.h"
 #import "MWTapDetectingView.h"
+#import "MWPhotoBrowserPage.h"
 
 @class MWPhotoBrowser, MWMediaItem, MWCaptionView;
 
-@interface MWZoomingScrollView : UIScrollView <UIScrollViewDelegate, MWTapDetectingImageViewDelegate, MWTapDetectingViewDelegate> {
+@interface MWZoomingScrollView : UIScrollView <UIScrollViewDelegate, MWTapDetectingViewDelegate, MWPhotoBrowserPage> {
 
 }
-
-@property () NSUInteger index;
-@property (nonatomic) MWMediaItem *mediaItem;
-@property (nonatomic, weak) MWCaptionView *captionView;
 @property (nonatomic, strong) UIView *auxilaryView;
-@property (nonatomic, weak) UIButton *selectedButton;
 
-- (id)initWithBrowser:(MWPhotoBrowser *)browser;
 - (void)displayImage;
 - (void)displayImageFailure;
 - (void)setMaxMinZoomScalesForCurrentBounds;
-- (void)prepareForReuse;
 
 @end

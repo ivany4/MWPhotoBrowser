@@ -198,7 +198,6 @@
 	MWPhotoBrowser *browser = [[MWPhotoBrowser alloc] initWithDelegate:self];
     browser.displayActionButton = displayActionButton;
     browser.displayNavArrows = displayNavArrows;
-    browser.displaySelectionButtons = displaySelectionButtons;
     browser.alwaysShowControls = displaySelectionButtons;
     browser.zoomPhotosToFill = YES;
     browser.enableSwipeToDismiss = YES;

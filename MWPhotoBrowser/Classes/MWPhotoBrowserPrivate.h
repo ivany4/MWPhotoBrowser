@@ -89,7 +89,6 @@
 - (CGPoint)contentOffsetForPageAtIndex:(NSUInteger)index;
 - (CGRect)frameForToolbarAtOrientation:(UIInterfaceOrientation)orientation;
 - (CGRect)frameForCaptionView:(MWCaptionView *)captionView atIndex:(NSUInteger)index;
-- (CGRect)frameForSelectedButton:(UIButton *)selectedButton atIndex:(NSUInteger)index;
 
 // Navigation
 - (void)updateNavigation;
@@ -108,8 +107,6 @@
 - (NSUInteger)numberOfMediaItems;
 - (MWMediaItem *)mediaItemAtIndex:(NSUInteger)index;
 - (UIImage *)imageForMediaItem:(MWMediaItem *)mediaItem;
-- (BOOL)mediaItemIsSelectedAtIndex:(NSUInteger)index;
-- (void)setMediaItemSelected:(BOOL)selected atIndex:(NSUInteger)index;
 - (void)loadAdjacentMediaItemsIfNecessary:(MWMediaItem *)mediaItem;
 - (void)releaseAllUnderlyingPhotos:(BOOL)preserveCurrent;
 

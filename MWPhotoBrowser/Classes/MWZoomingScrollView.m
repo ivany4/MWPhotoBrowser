@@ -18,7 +18,7 @@
     
     MWPhotoBrowser __weak *_photoBrowser;
 	MWTapDetectingView *_tapView; // for background taps
-	MWTapDetectingImageView *_photoImageView;
+	UIImageView *_photoImageView;
 	DACircularProgressView *_loadingIndicator;
     UIImageView *_loadingError;    
 }
@@ -26,6 +26,9 @@
 @end
 
 @implementation MWZoomingScrollView
+@synthesize mediaItem = _mediaItem;
+@synthesize captionView = _captionView;
+@synthesize index = _index;
 
 - (id)initWithBrowser:(MWPhotoBrowser *)browser {
     if ((self = [super init])) {
@@ -42,10 +45,10 @@
 		[self addSubview:_tapView];
 		
 		// Image view
-		_photoImageView = [[MWTapDetectingImageView alloc] initWithFrame:CGRectZero];
-		_photoImageView.tapDelegate = self;
+		_photoImageView = [[UIImageView alloc] initWithFrame:CGRectZero];
 		_photoImageView.contentMode = UIViewContentModeCenter;
 		_photoImageView.backgroundColor = [UIColor blackColor];
+        _photoImageView.userInteractionEnabled = NO;
 		[self addSubview:_photoImageView];
 		
 		// Loading indicator
@@ -88,7 +91,6 @@
     [self hideImageFailure];
     self.mediaItem = nil;
     self.captionView = nil;
-    self.selectedButton = nil;
     _photoImageView.image = nil;
     _index = NSUIntegerMax;
     [_auxilaryView removeFromSuperview], _auxilaryView = nil;
@@ -391,14 +393,6 @@
 	// Delay controls
 	[_photoBrowser hideControlsAfterDelay];
 	
-}
-
-// Image View
-- (void)imageView:(UIImageView *)imageView singleTapDetected:(UITouch *)touch { 
-    [self handleSingleTap:[touch locationInView:imageView]];
-}
-- (void)imageView:(UIImageView *)imageView doubleTapDetected:(UITouch *)touch {
-    [self handleDoubleTap:[touch locationInView:imageView]];
 }
 
 // Background View
